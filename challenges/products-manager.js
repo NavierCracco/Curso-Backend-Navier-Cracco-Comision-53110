@@ -1,15 +1,15 @@
-const fs = require("fs"); // Importamos file system
+const fs = require("fs").promises; // Importamos file system
 
 class ProductsManager {
-  constructor() {
-    this.path = "./products.json"; // Definimos la ruta del archivo donde se importarán los productos
+  constructor(path) {
+    this.path = path; // Definimos la ruta del archivo donde se importarán los productos
     this.loadProducts(); // Cargamos los productos al iniciar la clase
   }
 
-  loadProducts() {
+  async loadProducts() {
     try {
       // Intentamos leer el archivo JSON y convertirlo en un objeto JavaScript
-      const data = fs.readFileSync(this.path, "utf-8");
+      const data = await fs.readFile(this.path, "utf-8");
       this.products = JSON.parse(data);
     } catch (error) {
       // Si hay algún error, inicializamos products como un arreglo vacío
@@ -17,7 +17,7 @@ class ProductsManager {
     }
   }
 
-  addProduct(title, description, price, thumbnail, stock, code) {
+  async addProduct(title, description, price, thumbnail, stock, code) {
     // Generamos un ID automático
     let id = 1;
     if (this.products.length > 0) {
@@ -44,7 +44,7 @@ class ProductsManager {
     this.products.push(newProduct); // Agregamos el nuevo producto a la lista
 
     // Guardamos la lista actualizada en el archivo JSON
-    fs.writeFileSync(this.path, JSON.stringify(this.products, null, 4));
+    await fs.writeFile(this.path, JSON.stringify(this.products, null, 4));
   }
 
   getProducts() {
@@ -63,76 +63,53 @@ class ProductsManager {
     return product;
   }
 
-  updateProduct(id, updatedProduct) {
+  async updateProduct(id, updatedProduct) {
     // Buscamos el índice del producto a actualizar
     const index = this.products.findIndex((product) => product.id === id);
     if (index !== -1) {
       // Actualizamos el producto
       this.products[index] = { ...this.products[index], ...updatedProduct };
       // Guardamos la lista actualizada en el archivo JSON
-      fs.writeFileSync(this.path, JSON.stringify(this.products, null, 4));
+      await fs.writeFile(this.path, JSON.stringify(this.products, null, 4));
     } else {
       console.error(`No product found with id: ${id}`);
     }
   }
 
-  deleteProduct(id) {
+  async deleteProduct(id) {
     // Buscamos el índice del producto a eliminar
     const index = this.products.findIndex((product) => product.id === id);
     if (index !== -1) {
       // Eliminamos el producto de la lista
       this.products.splice(index, 1);
       // Guardamos la lista actualizada en el archivo JSON
-      fs.writeFileSync(this.path, JSON.stringify(this.products, null, 4));
+      await fs.writeFile(this.path, JSON.stringify(this.products, null, 4));
     } else {
       console.error(`No product found with id: ${id}`);
     }
   }
 }
 
-let pm = new ProductsManager(); // Instanciamos el gestor de productos
+(async () => {
+  let pm = new ProductsManager("./products.json"); // Instanciamos el gestor de productos
+  await pm.loadProducts(); // Cargamos los productos al iniciar la clase
 
-pm.addProduct(
-  "remera",
-  "remera azul",
-  2000,
-  "urltest/remera-azul",
-  10,
-  "123ABC"
-);
-pm.addProduct(
-  "remera",
-  "remera roja",
-  2000,
-  "urltest/remera-roja",
-  10,
-  "123CBA"
-);
-pm.addProduct(
-  "camisa",
-  "camisa verde",
-  5000,
-  "urltest/camisa-verde",
-  8,
-  "123BCA"
-);
-pm.addProduct(
-  "pantalon",
-  "pantalon amarillo",
-  3000,
-  "urltest/pantalon-amarillo",
-  10,
-  "123ACB"
-);
+  await pm.addProduct(
+    "camisa",
+    "camisa rosa",
+    2000,
+    "urltest/camisa-rosa",
+    10,
+    "321ACB"
+  );
 
-pm.updateProduct(1, { title: "remera oversize", price: 10000 });
-pm.updateProduct(3, { price: 15000 });
-
-pm.deleteProduct(2);
-
-// Líneas comentadas para pruebas y depuración
-// pm.addProduct("zapatilla", 8000, "urltest/zapatilla", 5);
-
-// Descomentar las siguiente líneas para probar las funciones
-// console.log(pm.getProducts());
-// console.log(pm.getProductById(3));
+  await pm.addProduct(
+    "zapatillas",
+    "zapatillas rojas",
+    3000,
+    "urltest/zapatillas-rojas",
+    10,
+    "231CBA"
+  );
+  console.log(await pm.getProducts());
+})();
