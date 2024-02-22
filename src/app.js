@@ -26,7 +26,8 @@ app.get("/products", async (req, res) => {
 // Ruta para obtener un producto por su id
 app.get("/products/:pid", async (req, res) => {
   const id = req.params.pid; // extraemos el id del parámetro de la ruta
-  const productId = await pm.getProductById(id); // intentamos obtener el producto por su id
+  let valorId = parseInt(id); // convertimos el id a número entero (si es necesario)
+  const productId = await pm.getProductById(valorId); // intentamos obtener el producto por su id
 
   // Si el producto no existe, enviamos un mensaje de error con código  404
   if (!productId) {

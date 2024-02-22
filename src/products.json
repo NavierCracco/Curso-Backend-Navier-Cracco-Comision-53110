@@ -1,6 +1,6 @@
 [
   {
-    "id": "1",
+    "id": 1,
     "title": "remera oversize",
     "description": "remera azul",
     "price": 10000,
@@ -9,7 +9,7 @@
     "code": "123ABC"
   },
   {
-    "id": "2",
+    "id": 2,
     "title": "camisa",
     "description": "camisa verde",
     "price": 15000,
@@ -18,7 +18,7 @@
     "code": "123BCA"
   },
   {
-    "id": "3",
+    "id": 3,
     "title": "pantalon",
     "description": "pantalon amarillo",
     "price": 3000,
@@ -27,7 +27,7 @@
     "code": "123ACB"
   },
   {
-    "id": "4",
+    "id": 4,
     "title": "camisa",
     "description": "camisa rosa",
     "price": 2000,
@@ -36,7 +36,7 @@
     "code": "321ACB"
   },
   {
-    "id": "5",
+    "id": 5,
     "title": "zapatillas",
     "description": "zapatillas rojas",
     "price": 3000,
@@ -45,7 +45,7 @@
     "code": "231CBA"
   },
   {
-    "id": "6",
+    "id": 6,
     "title": "zapatillas",
     "description": "zapatillas rojas",
     "price": 3000,
@@ -54,7 +54,7 @@
     "code": "231CBA"
   },
   {
-    "id": "7",
+    "id": 7,
     "title": "zapatillas",
     "description": "zapatillas rojas",
     "price": 3000,
@@ -63,7 +63,7 @@
     "code": "231CBA"
   },
   {
-    "id": "8",
+    "id": 8,
     "title": "zapatillas",
     "description": "zapatillas rojas",
     "price": 3000,
@@ -72,7 +72,7 @@
     "code": "231CBA"
   },
   {
-    "id": "9",
+    "id": 9,
     "title": "zapatillas",
     "description": "zapatillas rojas",
     "price": 3000,
