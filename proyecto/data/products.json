@@ -1,0 +1,145 @@
+[
+    {
+        "id": 1,
+        "title": "remera adidas over",
+        "description": "remera adidas over",
+        "price": 16000,
+        "thumbnail": "urltest/remera-azul",
+        "stock": 10,
+        "status": true,
+        "category": "remeras",
+        "code": "123ABC"
+    },
+    {
+        "id": 2,
+        "title": "camisa",
+        "description": "camisa verde",
+        "price": 15000,
+        "thumbnail": "urltest/camisa-verde",
+        "stock": 8,
+        "status": true,
+        "category": "camisas",
+        "code": "123BCA"
+    },
+    {
+        "id": 3,
+        "title": "pantalon",
+        "description": "pantalon amarillo",
+        "price": 3000,
+        "thumbnail": "urltest/pantalon-amarillo",
+        "stock": 10,
+        "status": true,
+        "category": "pantalones",
+        "code": "123ACB"
+    },
+    {
+        "id": 4,
+        "title": "camisa",
+        "description": "camisa rosa",
+        "price": 2000,
+        "thumbnail": "urltest/camisa-rosa",
+        "stock": 10,
+        "status": true,
+        "category": "camisas",
+        "code": "321ACB"
+    },
+    {
+        "id": 5,
+        "title": "zapatillas nike jordan",
+        "description": "zapatillas nike jordan",
+        "price": 30000,
+        "thumbnail": "urltest/zapatillas-nike-jordan",
+        "stock": 10,
+        "status": true,
+        "category": "zapatillas",
+        "code": "231CBA"
+    },
+    {
+        "id": 6,
+        "title": "zapatillas",
+        "description": "zapatillas rojas",
+        "price": 3000,
+        "thumbnail": "urltest/zapatillas-rojas",
+        "stock": 10,
+        "status": true,
+        "category": "zapatillas",
+        "code": "231CBA"
+    },
+    {
+        "id": 7,
+        "title": "zapatillas",
+        "description": "zapatillas rojas",
+        "price": 3000,
+        "thumbnail": "urltest/zapatillas-rojas",
+        "stock": 10,
+        "status": true,
+        "category": "zapatillas",
+        "code": "231CBA"
+    },
+    {
+        "id": 8,
+        "title": "zapatillas",
+        "description": "zapatillas rojas",
+        "price": 3000,
+        "thumbnail": "urltest/zapatillas-rojas",
+        "stock": 10,
+        "status": true,
+        "category": "zapatillas",
+        "code": "231CBA"
+    },
+    {
+        "id": 9,
+        "title": "zapatillas",
+        "description": "zapatillas rojas",
+        "price": 3000,
+        "thumbnail": "urltest/zapatillas-rojas",
+        "stock": 10,
+        "status": true,
+        "category": "zapatillas",
+        "code": "231CBA"
+    },
+    {
+        "id": 10,
+        "title": "zapatillas adidas",
+        "description": "zapatillas adidas originals",
+        "price": 39000,
+        "thumbnail": "urltest/zapatillas-adidas-originals",
+        "stock": 12,
+        "status": true,
+        "category": "zapatillas",
+        "code": "123asd"
+    },
+    {
+        "id": 11,
+        "title": "remera puma",
+        "description": "remera puma negra",
+        "price": 15000,
+        "thumbnail": "urltest/remera-puma-negra",
+        "stock": 20,
+        "code": "123asdfg",
+        "category": "remeras",
+        "status": true
+    },
+    {
+        "id": 12,
+        "title": "remera nike",
+        "description": "remera nike verde",
+        "price": 15000,
+        "thumbnail": "urltest/remera-nike-verde",
+        "stock": 20,
+        "code": "123asdfghj",
+        "category": "remeras",
+        "status": true
+    },
+    {
+        "id": 13,
+        "title": "remera adidas",
+        "description": "remera adidas amarilla",
+        "price": 12000,
+        "thumbnail": "urltest/remera-adidas-amarilla",
+        "stock": 20,
+        "code": "123asdfghjk",
+        "category": "remeras",
+        "status": true
+    }
+]
