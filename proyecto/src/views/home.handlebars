@@ -1,0 +1,18 @@
+<div>
+  <h1>Fiuumb3</h1>
+  <a href="/realtimeproducts"> Products</a>
+</div>
+<hr />
+
+<h3>Lista de productos</h3>
+
+<ul>
+  {{#each products}}
+    <li><strong>nombre:</strong>
+      {{title}}
+      -
+      <strong>precio:</strong>
+      ${{price}}
+    </li>
+  {{/each}}
+</ul>

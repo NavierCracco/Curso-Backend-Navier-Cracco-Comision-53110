@@ -1,12 +1,13 @@
 import { Router } from "express";
 import { ProductsManager } from "../managers/products-manager.js";
+import { productsPath } from "../utils.js";
 
-const productRouter = Router();
-const productManager = new ProductsManager("./data/products.json");
+export const router = Router();
+const productManager = new ProductsManager(productsPath);
 
-productRouter.get("/", async (req, res) => {
+router.get("/", async (req, res) => {
   let { limit, skip } = req.query; // extraemos los paramentros de consulta
-  const products = await productManager.getProducts();
+  let products = await productManager.getProducts();
 
   // Aplicamos la paginación si se proporcionaron "limit" y "skip"
   if (skip && skip > 0) {
@@ -19,7 +20,7 @@ productRouter.get("/", async (req, res) => {
   res.json(products);
 });
 
-productRouter.get("/:pid", async (req, res) => {
+router.get("/:pid", async (req, res) => {
   try {
     const id = parseInt(req.params.pid); // extraemos el id del parámetro de la ruta
     // let valorId = parseInt(id); // convertimos el id a número entero (si es necesario)
@@ -36,7 +37,7 @@ productRouter.get("/:pid", async (req, res) => {
   }
 });
 
-productRouter.post("/", async (req, res) => {
+router.post("/", async (req, res) => {
   const { title, description, code, price, stock, category, thumbnail } =
     req.body;
   const status = true;
@@ -66,7 +67,7 @@ productRouter.post("/", async (req, res) => {
   }
 });
 
-productRouter.put("/:pid", async (req, res) => {
+router.put("/:pid", async (req, res) => {
   const pid = parseInt(req.params.pid, 10);
   const updatedProduct = req.body;
 
@@ -86,7 +87,7 @@ productRouter.put("/:pid", async (req, res) => {
   }
 });
 
-productRouter.delete("/:pid", async (req, res) => {
+router.delete("/:pid", async (req, res) => {
   const pid = parseInt(req.params.pid, 10);
   const productId = await productManager.getProductById(pid);
 
@@ -101,5 +102,3 @@ productRouter.delete("/:pid", async (req, res) => {
     res.status(500).json({ error: "Error deleting product" });
   }
 });
-
-export default productRouter;

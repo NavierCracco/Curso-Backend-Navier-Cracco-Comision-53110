@@ -11,7 +11,6 @@ export class ProductsManager {
       // Intentamos leer el archivo JSON y convertirlo en un objeto JavaScript
       const data = await fs.readFile(this.path, "utf-8");
       this.products = JSON.parse(data);
-      console.log(`Loaded ${this.products.length} products`);
     } catch (error) {
       // Si hay algún error, inicializamos products como un arreglo vacío
       this.products = [];
@@ -39,7 +38,7 @@ export class ProductsManager {
       (product) => product.code === code
     );
     if (existingProduct) {
-      throw new Error(`Product with same code: ${code}, already exists`);
+      throw Error(`Product with same code: ${code}, already exists`);
     }
 
     // Creamos un nuevo producto

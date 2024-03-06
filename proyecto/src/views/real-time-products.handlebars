@@ -1,0 +1,91 @@
+<div class="navbar">
+  <h2 class="title">Products: </h2>
+  <a href="/"> Home Page</a>
+</div>
+
+<div id="product-list" class="list-container">
+  {{#each products}}
+    <ul id="{{this.id}}" class="products">
+      <p class="title-product">{{this.title}}</p>
+      <li class="img-product">{{this.thumbnail}}</li>
+      <li>${{this.price}}</li>
+      <li><strong>Descripción:</strong> {{this.description}}</li>
+      <li><strong>Categoría:</strong> {{this.category}}</li>
+      <li><strong>Stock:</strong> {{this.stock}}</li>
+      <li><strong>Estado:</strong> {{this.status}}</li>
+      <li><strong>Code:</strong> {{this.code}}</li>
+      <button data-id="{{this.id}}" class="btn-delete">Borrar</button>
+    </ul>
+
+  {{/each}}
+</div>
+
+<hr />
+
+<div class="edit-container">
+  <h3 class="title-edit">Añade un producto</h3>
+  <form class="form" id="product-form">
+
+    <input
+      id="product-title"
+      name="title"
+      type="text"
+      placeholder="nombre del producto"
+      required
+    />
+    <input
+      id="product-price"
+      name="price"
+      type="number"
+      placeholder="precio"
+      required
+    />
+    <input
+      id="product-description"
+      name="description"
+      type="text"
+      placeholder="descripcion"
+      required
+    />
+    <input
+      id="product-category"
+      name="category"
+      type="text"
+      placeholder="categoria"
+      required
+    />
+    <input
+      id="product-stock"
+      name="stock"
+      type="number"
+      placeholder="stock"
+      required
+    />
+
+    <select name="status" id="status-true">
+
+      <option value="true">True</option>
+
+    </select>
+
+    <input
+      id="product-thumbnail"
+      name="thumbnail"
+      type="text"
+      placeholder="thumbnail"
+      required
+    />
+    <input
+      id="product-code"
+      name="code"
+      type="text"
+      placeholder="code"
+      required
+    />
+    <input class="btn-add-product" type="submit" value="Añadir producto" />
+
+  </form>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/real-time-product.js"></script>

@@ -1,0 +1,79 @@
+[
+    {
+        "id": 1,
+        "title": "remera adidas over",
+        "description": "remera adidas over",
+        "price": 16000,
+        "thumbnail": "urltest/remera-azul",
+        "stock": 10,
+        "status": true,
+        "category": "remeras",
+        "code": "123ABC"
+    },
+    {
+        "id": 2,
+        "title": "camisa",
+        "description": "camisa verde",
+        "price": 15000,
+        "thumbnail": "urltest/camisa-verde",
+        "stock": 8,
+        "status": true,
+        "category": "camisas",
+        "code": "123BCA"
+    },
+    {
+        "id": 4,
+        "title": "camisa",
+        "description": "camisa rosa",
+        "price": 2000,
+        "thumbnail": "urltest/camisa-rosa",
+        "stock": 10,
+        "status": true,
+        "category": "camisas",
+        "code": "321ACB"
+    },
+    {
+        "id": 5,
+        "title": "zapatillas nike jordan",
+        "description": "zapatillas nike jordan",
+        "price": 30000,
+        "thumbnail": "urltest/zapatillas-nike-jordan",
+        "stock": 10,
+        "status": true,
+        "category": "zapatillas",
+        "code": "231CBA"
+    },
+    {
+        "id": 6,
+        "title": "Remera Adidas",
+        "description": "remera roja",
+        "price": "20000",
+        "thumbnail": "urltest/remera-adidas-roja",
+        "stock": "20",
+        "code": "1234asdzxc",
+        "category": "remeras",
+        "status": true
+    },
+    {
+        "id": 7,
+        "title": "fiat palio",
+        "description": "blanco",
+        "price": "8000000",
+        "thumbnail": "urltest/fiat-palio-blanco",
+        "stock": "4",
+        "code": "qwertasf12334",
+        "category": "autos",
+        "status": true
+    },
+    {
+        "id": 8,
+        "title": "volkswagen polo",
+        "description": "el polito",
+        "price": "10000000",
+        "thumbnail": "urltest/el-polito",
+        "stock": "1",
+        "code": "1234lalsk",
+        "category": "auto",
+        "status": true
+    }
+]

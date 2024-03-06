@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { CartManager } from "../managers/cart-manager.js";
+import { cartsPath } from "../utils.js";
 
-const cartRouter = Router();
-const cartManager = new CartManager("./data/carts.json");
+export const router = Router();
+const cartManager = new CartManager(cartsPath);
 
 // Ruta POST para crear un nuevo carrito
-cartRouter.post("/", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const newCart = await cartManager.addCart();
     res.status(201).json(newCart);
@@ -15,7 +16,7 @@ cartRouter.post("/", async (req, res) => {
 });
 
 // Ruta GET para listar los productos en un carrito
-cartRouter.get("/:cid", async (req, res) => {
+router.get("/:cid", async (req, res) => {
   const cid = parseInt(req.params.cid);
   try {
     const products = await cartManager.getCartById(cid);
@@ -26,7 +27,7 @@ cartRouter.get("/:cid", async (req, res) => {
 });
 
 // Ruta POST para agregar un producto al carrito
-cartRouter.post("/:cid/product/:pid", async (req, res) => {
+router.post("/:cid/product/:pid", async (req, res) => {
   const cid = parseInt(req.params.cid);
   const pid = parseInt(req.params.pid);
   const { quantity } = req.body;
@@ -38,5 +39,3 @@ cartRouter.post("/:cid/product/:pid", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-export default cartRouter;
