@@ -1,103 +1,160 @@
 import { Router } from "express";
-import { ProductsManager } from "../managers/products-manager.js";
-import { productsPath } from "../utils.js";
+// import { ProductsManager } from "../dao/managers/products-managerFS.js";
+import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
+// import { productsPath } from "../utils.js";
 
 export const router = Router();
-const productManager = new ProductsManager(productsPath);
+// const productManager = new ProductsManager(productsPath);
+const productManager = new ProductManagerMongo();
 
 router.get("/", async (req, res) => {
-  let { limit, skip } = req.query; // extraemos los paramentros de consulta
-  let products = await productManager.getProducts();
+  let { limit = 10, page = 1, sort, query } = req.query;
+  let queryParams = {};
 
-  // Aplicamos la paginación si se proporcionaron "limit" y "skip"
-  if (skip && skip > 0) {
-    products = products.slice(skip);
-  }
-  if (limit && limit > 0) {
-    products = products.slice(0, limit);
+  // Aplicamos filtro por si proporciona un query
+  if (query) {
+    queryParams = { ...queryParams, category: query };
   }
 
-  res.json(products);
-});
+  // Calculamos el offset para la paginacion
+  const offset = (page - 1) * limit;
 
-router.get("/:pid", async (req, res) => {
   try {
-    const id = parseInt(req.params.pid); // extraemos el id del parámetro de la ruta
-    // let valorId = parseInt(id); // convertimos el id a número entero (si es necesario)
-    const productId = await productManager.getProductById(id); // intentamos obtener el producto por su id
+    // Obtenemos el total de productos para calcular el totalPages
+    const totalProducts = await productManager.Product.countDocuments(
+      queryParams
+    );
+    const totalPages = Math.ceil(totalProducts / limit);
 
-    // Si el producto no existe, enviamos un mensaje de error con código  404
-    if (!productId) {
-      res.status(404).json({ error: "Product not found" });
-    } else {
-      res.json(productId); // si el producto existe, lo enviamos como respuesta
-    }
+    // Obtenemos los productos con paginacion y ordenamiento
+    let products = await productManager.Product.find(
+      queryParams,
+      {},
+      {
+        skip: offset,
+        limit: parseInt(limit),
+        sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
+      }
+    ).lean();
+
+    // Creamos la respuesta con los datos de paginacion y productos
+    const response = {
+      status: "success",
+      payload: products,
+      totalPages,
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      page,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+      prevLink: page > 1 ? `/?limit=${limit}&page=${page - 1}` : null,
+      nextLink: page < totalPages ? `/?limit=${limit}&page=${page + 1}` : null,
+    };
+    // res.status(200).json(response);
+    res.render("home", { products });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error - 500" });
+    res
+      .status(500)
+      .json({ error: "Internal server error - 500", error: error.message });
   }
 });
+
+router.get("/products", async (req, res) => {
+  let { limit = 10, page = 1, sort, query } = req.query;
+  let queryParams = {};
+
+  // Aplicamos filtro por si proporciona un query
+  if (query) {
+    queryParams = { ...queryParams, category: query };
+  }
+
+  // Calculamos el offset para la paginacion
+  const offset = (page - 1) * limit;
+
+  try {
+    // Obtenemos los productos con paginacion y ordenamiento
+    let products = await productManager.Product.find(
+      queryParams,
+      {},
+      {
+        skip: offset,
+        limit: parseInt(limit),
+        sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
+      }
+    ).lean();
+    res.render("products", { products });
+  } catch (error) {
+    res.status(500).json({ error: "Error getting products" });
+  }
+});
+
+// router.get("/:pid", async (req, res) => {
+//   try {
+//     const id = req.params.pid; // extraemos el id del parámetro de la ruta
+//     const product = await productManager.getProductById(id); // intentamos obtener el producto por su id
+
+//     // Si el producto no existe, enviamos un mensaje de error con código 404
+//     if (!product) {
+//       res.status(404).json({ error: "Product not found" });
+//     } else {
+//       res.json(product); // si el producto existe, lo enviamos como respuesta
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal server error - 500" });
+//   }
+// });
 
 router.post("/", async (req, res) => {
-  const { title, description, code, price, stock, category, thumbnail } =
-    req.body;
-  const status = true;
+  const productData = req.body;
+  // const status = true;
 
-  if (isNaN(price) || isNaN(stock)) {
-    return res.status(400).json({ error: "Price and stock must be numbers" });
-  }
+  // if (isNaN(price) || isNaN(stock)) {
+  //   return res.status(400).json({ error: "Price and stock must be numbers" });
+  // }
 
-  if (!title || !description || !code || !price || !stock || !category) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
+  // if (!title || !description || !code || !price || !stock || !category) {
+  //   return res.status(400).json({ error: "Missing required fields" });
+  // }
 
   try {
-    await productManager.addProduct(
-      title,
-      description,
-      price,
-      thumbnail,
-      stock,
-      code,
-      category,
-      status
-    );
-    res.status(201).json("Product added");
+    const newProduct = await productManager.addProduct(productData);
+    res.status(201).json(newProduct);
   } catch (error) {
     res.status(400).json({ error: "Error adding product" });
   }
 });
 
 router.put("/:pid", async (req, res) => {
-  const pid = parseInt(req.params.pid, 10);
+  const pid = req.params.pid;
   const updatedProduct = req.body;
 
-  const productId = await productManager.getProductById(pid);
-  if (!productId) {
-    res.status(400).json({ error: "Product not found" });
-  }
-
   try {
-    await productManager.updateProduct(pid, updatedProduct);
-    res.json({
-      message: "Product updated",
-      product: { ...productId, ...updatedProduct },
-    });
+    const product = await productManager.getProductById(pid);
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
+    } else {
+      const updated = await productManager.updateProduct(pid, updatedProduct);
+      res.json({
+        message: "Product updated",
+        product: updated,
+      });
+    }
   } catch (error) {
     res.status(400).json({ error: "Error updating product" });
   }
 });
 
 router.delete("/:pid", async (req, res) => {
-  const pid = parseInt(req.params.pid, 10);
-  const productId = await productManager.getProductById(pid);
-
-  if (!productId) {
-    res.status(404).json({ error: "Product not found" });
-  }
+  const pid = req.params.pid;
 
   try {
-    await productManager.deleteProduct(pid);
-    res.json(`Product deleted with id: ${pid}`);
+    const product = await productManager.getProductById(pid);
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
+    } else {
+      await productManager.deleteProduct(pid);
+      res.json(`Product deleted with id: ${pid}`);
+    }
   } catch (error) {
     res.status(500).json({ error: "Error deleting product" });
   }

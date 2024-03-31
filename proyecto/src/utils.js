@@ -6,5 +6,5 @@ const __dirname = dirname(__filename);
 
 export default __dirname;
 
-export const productsPath = join(__dirname, "data", "products.json");
-export const cartsPath = join(__dirname, "data", "carts.json");
+// export const productsPath = join(__dirname, "data", "products.json");
+// export const cartsPath = join(__dirname, "data", "carts.json");

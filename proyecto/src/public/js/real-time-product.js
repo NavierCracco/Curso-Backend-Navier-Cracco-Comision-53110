@@ -14,7 +14,7 @@ const updateProductsList = (products) => {
           <li><strong>Stock:</strong> ${product.stock}</li>
           <li><strong>Estado:</strong> ${product.status}</li>
           <li><strong>Code:</strong> ${product.code}</li> 
-          <button data-id="${product.id}" class="btn-delete">Borrar</button>
+          <button data-id="${product._id}" class="btn-delete">Borrar</button>
       </ul>`;
   });
   list.innerHTML = html;
@@ -22,9 +22,9 @@ const updateProductsList = (products) => {
   const deleteButtons = document.querySelectorAll(".btn-delete");
   deleteButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const productId = parseInt(btn.getAttribute("data-id"));
-      console.log(productId);
-      socket.emit("deleteProduct", { id: productId });
+      const productId = btn.getAttribute("data-id");
+      // console.log(productId);
+      socket.emit("deleteProduct", productId);
     });
   });
 };

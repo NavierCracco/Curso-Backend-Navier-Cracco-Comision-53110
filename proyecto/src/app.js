@@ -1,20 +1,28 @@
 import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 import { engine } from "express-handlebars";
-import __dirname, { productsPath } from "./utils.js";
+import __dirname from "./utils.js";
 import path from "path";
 import { Server } from "socket.io";
 import { router as productRouter } from "./routes/products.routing.js";
 import { router as cartRouter } from "./routes/cart.routing.js";
 import { router as viewsRouter } from "./routes/real-time-products.routing.js";
-import { ProductsManager } from "./managers/products-manager.js";
+import { router as userRouter } from "./routes/user.routing.js";
+// import { ProductsManager } from "./dao/managers/products-managerFS.js";
+import { ProductManagerMongo } from "./dao/managers/productsManagerMongo.js";
+dotenv.config();
 
 const app = express(); // creamos la app de express
 app.use(express.json()); // usamos el middleware json de express
 app.use(express.urlencoded({ extended: true })); // usamos el middleware urlencoded de express para procesar formularios enviados por el cliente
-const productsManager = new ProductsManager(productsPath);
+// const productsManager = new ProductsManager(productsPath);
+const productsManager = new ProductManagerMongo();
 
-app.use("/api/products", productRouter); // usamos el router de productos en la ruta /api/products
-app.use("/api/carts", cartRouter); // usamos el router de carritos en la ruta /api/carts
+// app.use("/api/products", productRouter); // usamos el router de productos en la ruta /api/products
+app.use("/", productRouter);
+app.use("/cart", cartRouter); // usamos el router de carritos en la ruta /api/carts
+app.use("/", userRouter); // usamos el router de usuarios en la ruta /api/users
 app.use(express.static(path.join(__dirname, "/public"))); // usamos el middleware static de express para servir archivos estaticos en la carpeta public
 
 app.engine("handlebars", engine()); // usamos el motor de plantillas handlebars
@@ -31,25 +39,32 @@ const server = app.listen(PORT, () => {
 
 export const io = new Server(server);
 
+const connect = async () => {
+  try {
+    await mongoose.connect(
+      `mongodb+srv://cracconavier:${process.env.MONGO_ATLAS_PASSWORD}@cluster0.p4qr6qc.mongodb.net/e-commerce?retryWrites=true&w=majority&appName=Cluster0`
+    );
+    console.log("DB connected!");
+  } catch (error) {
+    console.log("faiulure connection to DB. Detail:", error.message);
+  }
+};
+connect();
+
 io.on("connection", (socket) => {
   socket.on("newProduct", async (productData) => {
-    await productsManager.addProduct(
-      productData.title,
-      productData.description,
-      productData.price,
-      productData.thumbnail,
-      productData.stock,
-      productData.code,
-      productData.category,
-      productData.status
-    );
+    await productsManager.addProduct(productData);
     const updatedProducts = await productsManager.getProducts();
     io.emit("products", updatedProducts);
   });
 
-  socket.on("deleteProduct", async (data) => {
-    await productsManager.deleteProduct(data.id);
-    io.emit("products", await productsManager.getProducts());
+  socket.on("deleteProduct", async (productId) => {
+    try {
+      await productsManager.deleteProduct(productId);
+      io.emit("products", await productsManager.getProducts());
+    } catch (error) {
+      console.error("Error deleting product:", error.message);
+    }
   });
 
   socket.on("requestInitialProducts", async () => {
