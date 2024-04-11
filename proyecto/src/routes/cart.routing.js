@@ -48,28 +48,23 @@ router.post("/:cartId/product/:productId", async (req, res) => {
   }
 });
 
-router.post(
-  "/carts/6607ae06feb283d3a93e4118/product/:productId",
-  async (req, res) => {
-    const { productId } = req.params;
-    const { quantity } = req.body;
-    console.log(quantity);
-    const cartId = "6607ae06feb283d3a93e4118";
+router.post("/carts/:cartId/product/:productId", async (req, res) => {
+  const { cartId, productId } = req.params;
+  const { quantity } = req.body;
 
-    try {
-      const cart = await cartManager.addProductToCart(
-        cartId,
-        productId,
-        quantity
-      );
-      res.json(cart);
-    } catch (error) {
-      res
-        .status(500)
-        .json({ error: "Internal server error", error: error.message });
-    }
+  try {
+    const cart = await cartManager.addProductToCart(
+      cartId,
+      productId,
+      quantity
+    );
+    res.json(cart);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Internal server error", error: error.message });
   }
-);
+});
 
 router.delete("/:cartId/product/:productId", async (req, res) => {
   const { cartId, productId } = req.params;

@@ -4,9 +4,10 @@ document
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
+    console.log(data);
 
     try {
-      const response = await fetch("/register", {
+      const response = await fetch("/api/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

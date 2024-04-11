@@ -1,13 +1,15 @@
 import { Router } from "express";
-// import { ProductsManager } from "../dao/managers/products-managerFS.js";
 import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
+import { User } from "../dao/models/user.model.js";
+import { ensureAuthenticated, ensureAdmin } from "../middlewares/auth.js";
+// import { ProductsManager } from "../dao/managers/products-managerFS.js";
 // import { productsPath } from "../utils.js";
 
 export const router = Router();
 // const productManager = new ProductsManager(productsPath);
 const productManager = new ProductManagerMongo();
 
-router.get("/", async (req, res) => {
+router.get("/", ensureAuthenticated, async (req, res) => {
   let { limit = 10, page = 1, sort, query } = req.query;
   let queryParams = {};
 
@@ -59,13 +61,18 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/products", async (req, res) => {
+router.get("/products", ensureAuthenticated, async (req, res) => {
   let { limit = 10, page = 1, sort, query } = req.query;
   let queryParams = {};
 
   // Aplicamos filtro por si proporciona un query
   if (query) {
     queryParams = { ...queryParams, category: query };
+  }
+
+  const user = await User.findById(req.session.userId).lean();
+  if (!user) {
+    return res.send("User not found");
   }
 
   // Calculamos el offset para la paginacion
@@ -82,7 +89,7 @@ router.get("/products", async (req, res) => {
         sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
       }
     ).lean();
-    res.render("products", { products });
+    res.render("products", { products, user, adminUser });
   } catch (error) {
     res.status(500).json({ error: "Error getting products" });
   }

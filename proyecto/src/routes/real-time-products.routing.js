@@ -1,8 +1,9 @@
 import { Router } from "express";
-// import { ProductsManager } from "../dao/managers/products-managerFS.js";
 import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
-// import { productsPath } from "../utils.js";
 import { io } from "../app.js";
+import { ensureAdmin } from "../middlewares/auth.js";
+// import { ProductsManager } from "../dao/managers/products-managerFS.js";
+// import { productsPath } from "../utils.js";
 
 export const router = Router();
 // const productsManager = new ProductsManager(productsPath);
@@ -13,7 +14,7 @@ router.get("/", async (req, res) => {
   res.status(200).render("home", { products });
 });
 
-router.get("/realtimeproducts", async (req, res) => {
+router.get("/realtimeproducts", ensureAdmin, async (req, res) => {
   let products = await productsManager.getProducts();
   res.status(200).render("real-time-products", { products });
 });

@@ -1,0 +1,22 @@
+<h2>Login</h2>
+{{! <a href="/products">Products</a> }}
+<hr />
+<form id="login-form" action="/api/users/login" method="post">
+
+  <label for="email">Email:</label>
+  <input type="email" name="email" placeholder="email" id="email" />
+  <label for="password">Password:</label>
+  <input
+    type="password"
+    name="password"
+    placeholder="contraseña"
+    id="password"
+  />
+  <button type="submit">Login</button>
+
+</form>
+
+<br />
+<a href="/api/users/register">Regístrate</a>
+
+<script src="/js/login.js"></script>

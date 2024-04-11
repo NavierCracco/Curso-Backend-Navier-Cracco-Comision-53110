@@ -8,8 +8,6 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       required: [true, "can't be blank"],
       match: [/^[a-zA-Z0-9]+$/, "is invalid"],
-      index: true,
-      unique: true,
     },
     email: {
       type: String,
@@ -18,6 +16,12 @@ const UserSchema = new mongoose.Schema(
       match: [/\S+@\S+\.\S+/, "is invalid"],
       index: true,
       unique: true,
+    },
+    password: {
+      type: String,
+    },
+    role: {
+      type: String,
     },
     cart: {
       type: mongoose.Schema.Types.ObjectId,
