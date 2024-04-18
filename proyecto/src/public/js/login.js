@@ -1,8 +1,3 @@
-// let btnSubmit = document.getElementById("submit");
-// let inputEmail = document.getElementById("email");
-// let inputPassword = document.getElementById("password");
-// let divMensaje = document.getElementById("mensaje");
-
 document.getElementById("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
@@ -10,7 +5,7 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
   console.log(data);
 
   try {
-    const response = await fetch("/api/users/login", {
+    const response = await fetch("/api/sessions/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -23,20 +18,3 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     console.log(error);
   }
 });
-
-// btnSubmit.addEventListener("click", async (e) => {
-//   e.preventDefault();
-
-//   let body = {
-//     email: inputEmail.value,
-//     password: inputPassword.value,
-//   };
-
-//   let resultado = await fetch("/api/users/login", {
-//     method: "post",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(body),
-//   });
-// });

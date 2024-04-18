@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
 import { User } from "../dao/models/user.model.js";
-import { ensureAuthenticated, ensureAdmin } from "../middlewares/auth.js";
+import { ensureAuthenticated, ensureAccess } from "../middlewares/auth.js";
 // import { ProductsManager } from "../dao/managers/products-managerFS.js";
 // import { productsPath } from "../utils.js";
 
@@ -9,91 +9,107 @@ export const router = Router();
 // const productManager = new ProductsManager(productsPath);
 const productManager = new ProductManagerMongo();
 
-router.get("/", ensureAuthenticated, async (req, res) => {
-  let { limit = 10, page = 1, sort, query } = req.query;
-  let queryParams = {};
+router.get(
+  "/",
+  ensureAuthenticated,
+  ensureAccess(["public"]),
+  async (req, res) => {
+    let { limit = 10, page = 1, sort, query } = req.query;
+    let queryParams = {};
 
-  // Aplicamos filtro por si proporciona un query
-  if (query) {
-    queryParams = { ...queryParams, category: query };
+    // Aplicamos filtro por si proporciona un query
+    if (query) {
+      queryParams = { ...queryParams, category: query };
+    }
+
+    // Calculamos el offset para la paginacion
+    const offset = (page - 1) * limit;
+
+    try {
+      // Obtenemos el total de productos para calcular el totalPages
+      const totalProducts = await productManager.Product.countDocuments(
+        queryParams
+      );
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      // Obtenemos los productos con paginacion y ordenamiento
+      let products = await productManager.Product.find(
+        queryParams,
+        {},
+        {
+          skip: offset,
+          limit: parseInt(limit),
+          sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
+        }
+      ).lean();
+
+      // Creamos la respuesta con los datos de paginacion y productos
+      const response = {
+        status: "success",
+        payload: products,
+        totalPages,
+        prevPage: page > 1 ? page - 1 : null,
+        nextPage: page < totalPages ? page + 1 : null,
+        page,
+        hasPrevPage: page > 1,
+        hasNextPage: page < totalPages,
+        prevLink: page > 1 ? `/?limit=${limit}&page=${page - 1}` : null,
+        nextLink:
+          page < totalPages ? `/?limit=${limit}&page=${page + 1}` : null,
+      };
+      // res.status(200).json(response);
+      res.render("home", { products });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Internal server error - 500", error: error.message });
+    }
   }
+);
 
-  // Calculamos el offset para la paginacion
-  const offset = (page - 1) * limit;
+router.get(
+  "/products",
+  ensureAuthenticated,
+  ensureAccess(["usuario", "admin"]),
+  async (req, res) => {
+    let { limit = 10, page = 1, sort, query } = req.query;
+    let queryParams = {};
 
-  try {
-    // Obtenemos el total de productos para calcular el totalPages
-    const totalProducts = await productManager.Product.countDocuments(
-      queryParams
-    );
-    const totalPages = Math.ceil(totalProducts / limit);
+    // Aplicamos filtro por si proporciona un query
+    if (query) {
+      queryParams = { ...queryParams, category: query };
+    }
+    // console.log(req.session.user);
 
-    // Obtenemos los productos con paginacion y ordenamiento
-    let products = await productManager.Product.find(
-      queryParams,
-      {},
-      {
-        skip: offset,
-        limit: parseInt(limit),
-        sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
-      }
-    ).lean();
+    let user = req.session.user ? req.session.user : req.session.userId;
+    let usuario = await User.findById(user).lean();
+    if (!usuario) {
+      return res.send("User not found");
+    }
 
-    // Creamos la respuesta con los datos de paginacion y productos
-    const response = {
-      status: "success",
-      payload: products,
-      totalPages,
-      prevPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      page,
-      hasPrevPage: page > 1,
-      hasNextPage: page < totalPages,
-      prevLink: page > 1 ? `/?limit=${limit}&page=${page - 1}` : null,
-      nextLink: page < totalPages ? `/?limit=${limit}&page=${page + 1}` : null,
-    };
-    // res.status(200).json(response);
-    res.render("home", { products });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Internal server error - 500", error: error.message });
+    // Calculamos el offset para la paginacion
+    const offset = (page - 1) * limit;
+
+    try {
+      // Obtenemos los productos con paginacion y ordenamiento
+      let products = await productManager.Product.find(
+        queryParams,
+        {},
+        {
+          skip: offset,
+          limit: parseInt(limit),
+          sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
+        }
+      ).lean();
+
+      res.render("products", { products, usuario });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Error getting products", error: error.message });
+    }
   }
-});
-
-router.get("/products", ensureAuthenticated, async (req, res) => {
-  let { limit = 10, page = 1, sort, query } = req.query;
-  let queryParams = {};
-
-  // Aplicamos filtro por si proporciona un query
-  if (query) {
-    queryParams = { ...queryParams, category: query };
-  }
-
-  const user = await User.findById(req.session.userId).lean();
-  if (!user) {
-    return res.send("User not found");
-  }
-
-  // Calculamos el offset para la paginacion
-  const offset = (page - 1) * limit;
-
-  try {
-    // Obtenemos los productos con paginacion y ordenamiento
-    let products = await productManager.Product.find(
-      queryParams,
-      {},
-      {
-        skip: offset,
-        limit: parseInt(limit),
-        sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
-      }
-    ).lean();
-    res.render("products", { products, user, adminUser });
-  } catch (error) {
-    res.status(500).json({ error: "Error getting products" });
-  }
-});
+);
 
 // router.get("/:pid", async (req, res) => {
 //   try {

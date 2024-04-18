@@ -9,8 +9,10 @@ import { Server } from "socket.io";
 import { router as productRouter } from "./routes/products.routing.js";
 import { router as cartRouter } from "./routes/cart.routing.js";
 import { router as viewsRouter } from "./routes/real-time-products.routing.js";
-import { router as userRouter } from "./routes/user.routing.js";
+import { router as sessionsRouter } from "./routes/session.routing.js";
 import { ProductManagerMongo } from "./dao/managers/productsManagerMongo.js";
+import passport from "passport";
+import { initPassport } from "./config/passport.config.js";
 // import { ProductsManager } from "./dao/managers/products-managerFS.js";
 dotenv.config();
 
@@ -24,26 +26,27 @@ app.use(
     saveUninitialized: true,
   })
 ); // usamos el middleware session de express para manejar sesiones de usuario
+initPassport();
+app.use(passport.initialize());
+
 app.use(express.static(path.join(__dirname, "/public"))); // usamos el middleware static de express para servir archivos estaticos en la carpeta public
 
 const productsManager = new ProductManagerMongo();
 
-// app.use("/api/products", productRouter); // usamos el router de productos en la ruta /api/products
-app.use("/", productRouter);
+app.use("/api/products", productRouter);
 app.use("/cart", cartRouter); // usamos el router de carritos en la ruta /api/carts
-app.use("/api/users", userRouter); // usamos el router de usuarios en la ruta /api/users
+app.use("/api/sessions", sessionsRouter); // usamos el router de usuarios en la ruta /api/users
+app.use("/", viewsRouter);
 
 app.engine("handlebars", engine()); // usamos el motor de plantillas handlebars
 app.set("view engine", "handlebars"); // establecemos el motor de plantillas a utilizar
 app.set("views", path.join(__dirname, "/views")); // establecemos la ruta de las vistas
 
-app.use("/", viewsRouter);
-
 // Iniciamos el servidor en el puerto 8080 o el puerto asignado por el entorno (si existe)
 const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => {
   console.log(
-    `Server running on port http://localhost:${PORT}/api/users/login`
+    `Server running on port http://localhost:${PORT}/api/sessions/login`
   );
 });
 

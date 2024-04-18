@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
 import { io } from "../app.js";
-import { ensureAdmin } from "../middlewares/auth.js";
+import { ensureAccess } from "../middlewares/auth.js";
+import { User } from "../dao/models/user.model.js";
 // import { ProductsManager } from "../dao/managers/products-managerFS.js";
 // import { productsPath } from "../utils.js";
 
@@ -14,9 +15,15 @@ router.get("/", async (req, res) => {
   res.status(200).render("home", { products });
 });
 
-router.get("/realtimeproducts", ensureAdmin, async (req, res) => {
+router.get("/realtimeproducts", ensureAccess(["admin"]), async (req, res) => {
   let products = await productsManager.getProducts();
-  res.status(200).render("real-time-products", { products });
+
+  let usuario = await User.findById(req.session.user).lean();
+  if (!usuario) {
+    return res.send("User not found");
+  }
+
+  res.status(200).render("real-time-products", { products, usuario });
 });
 
 router.post("/realtimeproducts", async (req, res) => {

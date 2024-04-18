@@ -4,6 +4,13 @@
 </div>
 
 <hr />
+<br />
+
+{{#if usuario}}
+  <p>Bienvenido de vuelta, {{usuario.role}}: {{usuario.username}}</p>
+{{/if}}
+
+<br />
 
 <div id="product-list" class="list-container">
   {{#each products}}

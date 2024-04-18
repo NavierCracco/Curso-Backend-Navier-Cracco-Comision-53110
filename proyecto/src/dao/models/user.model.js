@@ -7,7 +7,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       required: [true, "can't be blank"],
-      match: [/^[a-zA-Z0-9]+$/, "is invalid"],
     },
     email: {
       type: String,
@@ -28,7 +27,7 @@ const UserSchema = new mongoose.Schema(
       ref: "Cart",
     },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 UserSchema.plugin(uniqueValidator, { message: "is already taken." });

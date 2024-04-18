@@ -7,7 +7,7 @@ document
     console.log(data);
 
     try {
-      const response = await fetch("/api/users/register", {
+      const response = await fetch("/api/sessions/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

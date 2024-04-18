@@ -3,15 +3,15 @@
   <div class="navbar">
     <a href="/"> Home Page</a>
     <a href="/cart/carts/6607ae06feb283d3a93e4118">Cart</a>
-    <a href="/api/users/logout">Logout</a>
+    <a href="/api/sessions/logout">Logout</a>
   </div>
 </div>
 
 <hr />
 <br />
 
-{{#if user}}
-  <p>Bienvenido, {{user.role}}: {{user.username}}</p>
+{{#if usuario}}
+  <p>Bienvenido, {{usuario.role}}: {{usuario.username}}</p>
 {{/if}}
 
 <br />

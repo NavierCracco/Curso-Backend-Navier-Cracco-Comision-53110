@@ -1,7 +1,7 @@
 <h2>Login</h2>
 {{! <a href="/products">Products</a> }}
 <hr />
-<form id="login-form" action="/api/users/login" method="post">
+<form id="login-form" action="/api/sessions/login" method="post">
 
   <label for="email">Email:</label>
   <input type="email" name="email" placeholder="email" id="email" />
@@ -17,6 +17,8 @@
 </form>
 
 <br />
-<a href="/api/users/register">Regístrate</a>
+<a href="/api/sessions/register">Regístrate</a>
+<br />
+<a href="/api/sessions/github">Ingresar con github</a>
 
 <script src="/js/login.js"></script>
