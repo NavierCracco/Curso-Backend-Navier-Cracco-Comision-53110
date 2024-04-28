@@ -2,6 +2,7 @@ import { Router } from "express";
 import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
 import { User } from "../dao/models/user.model.js";
 import { ensureAuthenticated, ensureAccess } from "../middlewares/auth.js";
+import passport from "passport";
 // import { ProductsManager } from "../dao/managers/products-managerFS.js";
 // import { productsPath } from "../utils.js";
 
@@ -71,6 +72,7 @@ router.get(
   "/products",
   ensureAuthenticated,
   ensureAccess(["usuario", "admin"]),
+  // passport.authenticate("github", { session: false }),
   async (req, res) => {
     let { limit = 10, page = 1, sort, query } = req.query;
     let queryParams = {};
@@ -79,10 +81,8 @@ router.get(
     if (query) {
       queryParams = { ...queryParams, category: query };
     }
-    // console.log(req.session.user);
-
-    let user = req.session.user ? req.session.user : req.session.userId;
-    let usuario = await User.findById(user).lean();
+    // console.log(req.user.user._id);
+    let usuario = await User.findById(req.user.user._id).lean();
     if (!usuario) {
       return res.send("User not found");
     }

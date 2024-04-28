@@ -3,7 +3,12 @@ import uniqueValidator from "mongoose-unique-validator";
 
 const UserSchema = new mongoose.Schema(
   {
-    username: {
+    first_name: {
+      type: String,
+      lowercase: true,
+      required: [true, "can't be blank"],
+    },
+    last_name: {
       type: String,
       lowercase: true,
       required: [true, "can't be blank"],
@@ -19,8 +24,12 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
     },
+    age: {
+      type: Number,
+    },
     role: {
       type: String,
+      default: "usuario",
     },
     cart: {
       type: mongoose.Schema.Types.ObjectId,

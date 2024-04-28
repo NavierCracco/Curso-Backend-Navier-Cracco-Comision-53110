@@ -1,31 +1,24 @@
 import express from "express";
 import mongoose from "mongoose";
-import session from "express-session";
 import dotenv from "dotenv";
-import { engine } from "express-handlebars";
 import __dirname from "./utils.js";
 import path from "path";
+import passport from "passport";
+import cookieParser from "cookie-parser";
+import { engine } from "express-handlebars";
 import { Server } from "socket.io";
 import { router as productRouter } from "./routes/products.routing.js";
 import { router as cartRouter } from "./routes/cart.routing.js";
 import { router as viewsRouter } from "./routes/real-time-products.routing.js";
 import { router as sessionsRouter } from "./routes/session.routing.js";
 import { ProductManagerMongo } from "./dao/managers/productsManagerMongo.js";
-import passport from "passport";
 import { initPassport } from "./config/passport.config.js";
-// import { ProductsManager } from "./dao/managers/products-managerFS.js";
 dotenv.config();
 
 const app = express(); // creamos la app de express
 app.use(express.json()); // usamos el middleware json de express
 app.use(express.urlencoded({ extended: true })); // usamos el middleware urlencoded de express para procesar formularios enviados por el cliente
-app.use(
-  session({
-    secret: "contraseñaUltraMegaSecreta",
-    resave: true,
-    saveUninitialized: true,
-  })
-); // usamos el middleware session de express para manejar sesiones de usuario
+app.use(cookieParser(process.env.COOKIE_SECRET));
 initPassport();
 app.use(passport.initialize());
 

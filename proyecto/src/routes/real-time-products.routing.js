@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ProductManagerMongo } from "../dao/managers/productsManagerMongo.js";
 import { io } from "../app.js";
-import { ensureAccess } from "../middlewares/auth.js";
+import { ensureAccess, ensureAuthenticated } from "../middlewares/auth.js";
 import { User } from "../dao/models/user.model.js";
 // import { ProductsManager } from "../dao/managers/products-managerFS.js";
 // import { productsPath } from "../utils.js";
@@ -15,16 +15,23 @@ router.get("/", async (req, res) => {
   res.status(200).render("home", { products });
 });
 
-router.get("/realtimeproducts", ensureAccess(["admin"]), async (req, res) => {
-  let products = await productsManager.getProducts();
+router.get(
+  "/realtimeproducts",
+  ensureAuthenticated,
+  ensureAccess(["admin"]),
+  async (req, res) => {
+    let products = await productsManager.getProducts();
 
-  let usuario = await User.findById(req.session.user).lean();
-  if (!usuario) {
-    return res.send("User not found");
+    // console.log(req.user.user._id);
+    let usuario = await User.findById(req.user.user._id).lean();
+    if (!usuario) {
+      res.setHeader("Content-Type", "application/json");
+      return res.json("User not found");
+    }
+
+    res.status(200).render("real-time-products", { products, usuario });
   }
-
-  res.status(200).render("real-time-products", { products, usuario });
-});
+);
 
 router.post("/realtimeproducts", async (req, res) => {
   const { title, description, code, price, stock, category, thumbnail } =
