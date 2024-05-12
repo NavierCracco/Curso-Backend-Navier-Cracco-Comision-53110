@@ -1,10 +1,10 @@
 import passport from "passport";
 import github from "passport-github2";
 import jwt from "passport-jwt";
-import dotenv from "dotenv";
-import { User } from "../dao/models/user.model.js";
+import { UserMongoDao } from "../dao/UserMongoDAO.js";
+import { config } from "./config.js";
 
-dotenv.config();
+const userDao = new UserMongoDao();
 const searchingToken = (req) => {
   let token = null;
 
@@ -21,13 +21,13 @@ export const initPassport = () => {
     "jwt",
     new jwt.Strategy(
       {
-        secretOrKey: process.env.COOKIE_SECRET,
+        secretOrKey: config.general.COOKIE_SECRET,
         jwtFromRequest: new jwt.ExtractJwt.fromExtractors([searchingToken]),
         passReqToCallback: true,
       },
       async (req, jwtPayload, done) => {
         try {
-          const user = await User.findById(jwtPayload.id);
+          const user = await userDao.getById(jwtPayload.id);
           if (!user) {
             return done(null, false, { message: "Usuario no encontrado" });
           }
@@ -44,8 +44,9 @@ export const initPassport = () => {
     "github",
     new github.Strategy(
       {
-        // clientID: "Iv1.a46ac1227c23b147",
-        // clientSecret: "e4cfac7071da870832e6e0eb4e22cf698752b8c8",
+        clientID: config.github.CLIENT_ID,
+        clientSecret: config.github.CLIENT_SECRET,
+
         callbackURL: "http://localhost:8080/api/sessions/callbackGithub",
       },
       async function (accessToken, refreshToken, profile, done) {
@@ -59,9 +60,10 @@ export const initPassport = () => {
 
           let name = fullName.split(" ");
 
-          let user = await User.findOne({ email: email });
+          // let user = await User.findOne({ email: email });
+          let user = await userDao.getAll({ email });
           if (!user) {
-            user = await User.create({
+            user = await userDao.create({
               first_name: name[0],
               last_name: name[1],
               email,

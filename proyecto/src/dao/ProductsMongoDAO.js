@@ -1,29 +1,11 @@
-import mongoose from "mongoose";
-import { Product } from "../models/product.model.js";
+import { Product } from "./models/product.model.js";
 
-export class ProductManagerMongo {
+export class ProductMongoDao {
   constructor() {
     this.Product = Product;
   }
 
   async addProduct(productData) {
-    // if (
-    //   !productData.title ||
-    //   !productData.description ||
-    //   !productData.price ||
-    //   !productData.thumbnail ||
-    //   !productData.code ||
-    //   !productData.stock
-    // ) {
-    //   throw new Error("Missing required fields");
-    // }
-    if (productData.code) {
-      const product = await this.Product.findOne({ code: productData.code });
-      if (product) {
-        throw new Error("Product code already exists");
-      }
-    }
-
     try {
       const newProduct = new this.Product(productData);
       await newProduct.save();

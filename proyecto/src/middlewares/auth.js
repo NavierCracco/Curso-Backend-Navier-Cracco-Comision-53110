@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import { User } from "../dao/models/user.model.js";
-dotenv.config();
+import { config } from "../config/config.js";
 
 export function ensureAuthenticated(req, res, next) {
   let token = null;
@@ -15,7 +13,7 @@ export function ensureAuthenticated(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.COOKIE_SECRET);
+    const decoded = jwt.verify(token, config.general.COOKIE_SECRET);
     // console.log("decoded:", decoded);
     req.user = decoded;
   } catch (error) {

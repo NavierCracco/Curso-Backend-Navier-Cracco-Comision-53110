@@ -1,8 +1,14 @@
-import { Cart } from "../models/cart.model.js";
+import { Cart } from "./models/cart.model.js";
 
-export class CartManagerMongo {
+export class CartMongoDao {
   constructor() {
     this.Cart = Cart;
+  }
+
+  async createCart() {
+    const newCart = new this.Cart();
+    await newCart.save();
+    return newCart;
   }
 
   async addProductToCart(cartId, productId, quantity) {
@@ -50,7 +56,6 @@ export class CartManagerMongo {
     if (!cart) {
       throw new Error("Cart not found");
     }
-    console.log(quantity);
 
     const product = cart.products.find(
       (p) => p.productId.toString() === productId
@@ -58,8 +63,6 @@ export class CartManagerMongo {
 
     if (product) {
       product.quantity = quantity;
-    } else {
-      throw new Error("Product not found in cart");
     }
 
     await cart.save();

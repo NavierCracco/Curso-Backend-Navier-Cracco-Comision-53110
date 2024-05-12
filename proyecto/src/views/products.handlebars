@@ -2,7 +2,7 @@
   <h2 class="title">Productos </h2>
   <div class="navbar">
     <a href="/"> Home Page</a>
-    <a href="/cart/carts/6607ae06feb283d3a93e4118">Cart</a>
+    <a href="/cart/{{usuario.cart}}">Cart</a>
     <a href="/api/sessions/logout">Logout</a>
   </div>
 </div>
@@ -11,7 +11,7 @@
 <br />
 
 {{#if usuario}}
-  <p>Bienvenido,
+  <p data-cart="{{usuario.cart}}">Bienvenido,
     {{usuario.role}}:
     {{usuario.first_name}}
     {{usuario.last_name}}</p>

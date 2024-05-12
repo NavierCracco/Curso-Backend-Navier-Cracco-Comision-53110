@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
   for (let button of buttonList) {
     button.addEventListener("click", (e) => {
       let productId = e.target.getAttribute("data-id");
-      fetch(`/cart/carts/6607ae06feb283d3a93e4118/product/${productId}`, {
+      let cartId = e.target.getAttribute("data-cart");
+      fetch(`/cart/${cartId}/product/${productId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
