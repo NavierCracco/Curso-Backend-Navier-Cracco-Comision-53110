@@ -11,7 +11,7 @@
 <br />
 
 {{#if usuario}}
-  <p data-cart="{{usuario.cart}}">Bienvenido,
+  <p id="welcome-message" data-cart="{{usuario.cart}}">Bienvenido,
     {{usuario.role}}:
     {{usuario.first_name}}
     {{usuario.last_name}}</p>
@@ -23,7 +23,7 @@
     <ul id="{{_id}}" class="products">
       <p class="title-product">{{title}}</p>
       <li class="img-product">{{thumbnail}}</li>
-      <li>${{price}}</li>
+      <li id="price" data-price="{{price}}">${{price}}</li>
       <li><strong>Descripción:</strong> {{description}}</li>
       <li><strong>Categoría:</strong> {{category}}</li>
       <button type="button" class="btn-add-cart" data-id="{{_id}}">🛒</button>

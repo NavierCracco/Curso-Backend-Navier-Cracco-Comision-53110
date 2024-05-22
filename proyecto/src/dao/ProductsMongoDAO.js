@@ -21,7 +21,6 @@ export class ProductMongoDao {
       return await this.Product.find({}).lean();
     } catch (error) {
       console.error("Load error the products:", error.message);
-      throw new Error("Error loading products");
     }
   }
 
@@ -30,7 +29,6 @@ export class ProductMongoDao {
       return await this.Product.findById(id).lean();
     } catch (error) {
       console.error("Load error the product:", error.message);
-      throw new Error("Error loading product");
     }
   }
 
@@ -41,14 +39,12 @@ export class ProductMongoDao {
       });
     } catch (error) {
       console.error("Updating error the product:", error.message);
-      throw new Error("Error updating product");
     }
   }
 
   async deleteProduct(id) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new Error("Invalid product ID");
       }
 
       return await this.Product.findByIdAndDelete(id);

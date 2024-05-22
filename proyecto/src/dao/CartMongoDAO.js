@@ -11,7 +11,7 @@ export class CartMongoDao {
     return newCart;
   }
 
-  async addProductToCart(cartId, productId, quantity) {
+  async addProductToCart(cartId, productId, quantity, price) {
     const cart = await this.Cart.findById(cartId);
     if (!cart) {
       throw new Error("Cart not found");
@@ -24,8 +24,14 @@ export class CartMongoDao {
     if (productIndex !== -1) {
       cart.products[productIndex].quantity += quantity;
     } else {
-      cart.products.push({ productId, quantity });
+      cart.products.push({
+        productId,
+        quantity,
+      });
     }
+
+    const subTotal = price ? price * quantity : 0;
+    cart.totalPrice += subTotal;
 
     await cart.save();
     return cart;
@@ -41,15 +47,12 @@ export class CartMongoDao {
       .lean();
   }
 
-  // async updateCartProducts(cartId, newProducts) {
-  //   const cart = await this.Cart.findById(cartId);
-  //   if (!cart) {
-  //     throw new Error("Cart not found");
-  //   }
-  //   cart.products = newProducts;
-  //   await cart.save();
-  //   return cart;
-  // }
+  async updateCart(cartId, newCart) {
+    const cart = await this.Cart.findByIdAndUpdate(cartId, newCart, {
+      new: true,
+    });
+    return cart;
+  }
 
   async updateProductQuantity(cartId, productId, quantity) {
     const cart = await this.Cart.findById(cartId);
@@ -94,6 +97,7 @@ export class CartMongoDao {
       throw new Error("Cart not found");
     }
     cart.products = [];
+    cart.totalPrice = 0;
     await cart.save();
     return cart;
   }

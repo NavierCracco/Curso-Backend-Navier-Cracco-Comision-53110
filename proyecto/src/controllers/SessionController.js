@@ -1,5 +1,6 @@
 import { UserMongoDao as UserDao } from "../dao/UserMongoDAO.js";
 import { CartMongoDao as CartDao } from "../dao/CartMongoDAO.js";
+import { userService } from "../repository/usersService.js";
 import { config } from "../config/config.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -33,7 +34,12 @@ export class SessionController {
       role,
       cart: cart._id,
     });
-    await user.save();
+
+    cart = await cartDao.updateCart(cart._id, {
+      userId: user._id,
+    });
+
+    await cart.save();
 
     const token = jwt.sign({ user }, config.general.COOKIE_SECRET, {
       expiresIn: "24h",
@@ -98,8 +104,12 @@ export class SessionController {
 
   /// **** CURRENT **** ///
 
-  static current = (req, res) => {
+  static current = async (req, res) => {
+    // console.log(req.user.user._id);
+    let user = await userService.getUserById(req.user.user._id);
+    // console.log(user);
+
     res.setHeader("Content-Type", "application/json");
-    res.status(200).json(req.user);
+    res.status(200).json({ perfil: user });
   };
 }
