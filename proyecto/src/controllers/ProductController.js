@@ -1,5 +1,7 @@
 import { ProductMongoDao } from "../dao/ProductsMongoDAO.js";
 import { UserMongoDao } from "../dao/UserMongoDAO.js";
+import { ERRORS } from "../utils/EErrors.js";
+import { CustomError } from "../utils/customError.js";
 
 const productManager = new ProductMongoDao();
 const userDao = new UserMongoDao();
@@ -116,6 +118,14 @@ export class ProductController {
     const updatedProduct = req.body;
 
     try {
+      if (!pid) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "invalid pid",
+          message: "invalid argument",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
       const product = await productManager.getProductById(pid);
       if (!product) {
         res.status(404).json({ error: "Product not found" });
@@ -137,6 +147,14 @@ export class ProductController {
     const pid = req.params.pid;
 
     try {
+      if (!pid) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "invalid pid",
+          message: "invalid argument",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
       const product = await productManager.getProductById(pid);
       if (!product) {
         res.status(404).json({ error: "Product not found" });

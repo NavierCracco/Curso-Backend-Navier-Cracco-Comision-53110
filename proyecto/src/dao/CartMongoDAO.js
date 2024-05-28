@@ -1,3 +1,4 @@
+import { CustomError } from "../utils/customError.js";
 import { Cart } from "./models/cart.model.js";
 
 export class CartMongoDao {
@@ -13,9 +14,6 @@ export class CartMongoDao {
 
   async addProductToCart(cartId, productId, quantity, price) {
     const cart = await this.Cart.findById(cartId);
-    if (!cart) {
-      throw new Error("Cart not found");
-    }
 
     const productIndex = cart.products.findIndex(
       (p) => p.productId.toString() === productId
@@ -56,9 +54,6 @@ export class CartMongoDao {
 
   async updateProductQuantity(cartId, productId, quantity) {
     const cart = await this.Cart.findById(cartId);
-    if (!cart) {
-      throw new Error("Cart not found");
-    }
 
     const product = cart.products.find(
       (p) => p.productId.toString() === productId
@@ -74,17 +69,10 @@ export class CartMongoDao {
 
   async deleteProductCart(cartId, productId) {
     const cart = await this.Cart.findById(cartId);
-    if (!cart) {
-      throw new Error("Cart not found");
-    }
 
     const productIndex = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
-
-    if (productIndex === -1) {
-      throw new Error("Product not found in cart");
-    }
     cart.products.splice(productIndex, 1);
 
     await cart.save();
@@ -93,9 +81,7 @@ export class CartMongoDao {
 
   async clearCart(cartId) {
     const cart = await this.Cart.findById(cartId);
-    if (!cart) {
-      throw new Error("Cart not found");
-    }
+
     cart.products = [];
     cart.totalPrice = 0;
     await cart.save();

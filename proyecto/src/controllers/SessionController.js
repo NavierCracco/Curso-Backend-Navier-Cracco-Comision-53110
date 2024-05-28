@@ -4,6 +4,8 @@ import { userService } from "../repository/usersService.js";
 import { config } from "../config/config.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { CustomError } from "../utils/customError.js";
+import { th } from "@faker-js/faker";
 
 const userDao = new UserDao();
 const cartDao = new CartDao();
@@ -13,7 +15,12 @@ export class SessionController {
     const { first_name, last_name, email, age, password, role } = req.body;
 
     if (!first_name || !last_name || !email || !age || !password) {
-      return res.status(400).json({ error: "Missing data" });
+      throw new CustomError({
+        name: "Bad request",
+        cause: "Missing fields",
+        message: "Missing fields",
+        code: ERRORS["BAD REQUEST"],
+      });
     }
 
     let existingUser = await userDao.getAll({ email });
@@ -59,12 +66,22 @@ export class SessionController {
     const { email, password } = req.body;
     let user = await userDao.getAll({ email });
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      throw new CustomError({
+        name: "Not Found",
+        cause: "Invalid arguments",
+        message: "Not found",
+        code: ERRORS["NOT FOUND"],
+      });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid password" });
+      throw new CustomError({
+        name: "Unauthorized",
+        cause: "Invalid credentials",
+        message: "Unauthorized",
+        code: ERRORS["UNAUTHORIZED"],
+      });
     }
 
     user = {
