@@ -9,6 +9,7 @@ export const config = {
   general: {
     PORT: process.env.PORT || 8080,
     COOKIE_SECRET: process.env.COOKIE_SECRET,
+    MODE: process.env.MODE || "production",
   },
   db: {
     URL: process.env.MONGO_URL,
