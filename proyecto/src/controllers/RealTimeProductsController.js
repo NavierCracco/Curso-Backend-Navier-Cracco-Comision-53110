@@ -33,6 +33,7 @@ export class RealTimeProductsController {
     const { title, description, code, price, stock, category, thumbnail } =
       req.body;
     const status = true;
+    const ownerId = req.user.user._id;
 
     try {
       if (
@@ -52,7 +53,7 @@ export class RealTimeProductsController {
         });
       }
 
-      await productsManager.addProduct(
+      const product = await productsManager.addProduct({
         title,
         description,
         price,
@@ -60,9 +61,10 @@ export class RealTimeProductsController {
         stock,
         code,
         category,
-        status
-      );
-      res.status(201).json("Product added");
+        status,
+        owner: ownerId,
+      });
+      res.status(201).json({ message: "Product added:", product });
       io.emit("products", await productsManager.getProducts()); // Emitimos el evento products con los productos actualizados.
     } catch (error) {
       res.status(500).json(error.message);

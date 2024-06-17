@@ -46,7 +46,7 @@ export function ensureAccess(access = []) {
           .json({ error: `No tienes permiso para acceder a este recurso` });
       }
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ message: "error", error: error.message });
     }
 
     next();

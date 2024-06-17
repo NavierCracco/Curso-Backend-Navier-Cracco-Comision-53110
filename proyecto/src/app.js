@@ -12,6 +12,7 @@ import { router as adminRouter } from "./routes/realTimeProducts.routing.js";
 import { router as sessionsRouter } from "./routes/session.routing.js";
 import { router as mockingRouter } from "./routes/mock.routing.js";
 import { router as loggerRouter } from "./routes/loggerTest.routing.js";
+import { router as usersRouter } from "./routes/users.routing.js";
 import { ProductMongoDao } from "./dao/ProductsMongoDAO.js";
 import { initPassport } from "./config/passport.config.js";
 import { config } from "./config/config.js";
@@ -26,7 +27,7 @@ app.use(cookieParser(config.general.COOKIE_SECRET));
 initPassport();
 app.use(passport.initialize());
 
-app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 const productsManager = new ProductMongoDao();
 
@@ -37,6 +38,7 @@ app.use("/api/sessions", sessionsRouter);
 app.use("/", adminRouter);
 app.use("/mockingproducts", mockingRouter);
 app.use("/loggertest", loggerRouter);
+app.use("/api/users", usersRouter);
 
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");

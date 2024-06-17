@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Product } from "./models/product.model.js";
 
 export class ProductMongoDao {
@@ -16,11 +17,19 @@ export class ProductMongoDao {
     }
   }
 
-  async getProducts() {
+  async getProducts(options = {}) {
     try {
-      return await this.Product.find({}).lean();
+      return await this.Product.find(options).lean();
     } catch (error) {
       console.error("Load error the products:", error.message);
+    }
+  }
+
+  async getProductByCode(code) {
+    try {
+      return await this.Product.findOne({ code }).lean();
+    } catch (error) {
+      console.error("Load error the product:", error.message);
     }
   }
 

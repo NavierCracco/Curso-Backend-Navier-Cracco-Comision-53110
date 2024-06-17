@@ -7,7 +7,7 @@
 <br />
 
 {{#if usuario}}
-  <p>Bienvenido de vuelta,
+  <p id="user-id" data-id="{{usuario._id}}">Bienvenido de vuelta,
     {{usuario.role}}:
     {{usuario.first_name}}
     {{usuario.last_name}}</p>
@@ -26,6 +26,7 @@
       <li><strong>Stock:</strong> {{this.stock}}</li>
       <li><strong>Estado:</strong> {{this.status}}</li>
       <li><strong>Code:</strong> {{this.code}}</li>
+      <li><strong>Owner:</strong>{{this.owner}}</li>
       <button data-id="{{this.id}}" class="btn-delete">Borrar</button>
     </ul>
 

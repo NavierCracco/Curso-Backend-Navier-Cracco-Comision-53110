@@ -13,13 +13,28 @@ router.get(
 router.get(
   "/products",
   ensureAuthenticated,
-  ensureAccess(["usuario", "admin"]),
+  ensureAccess(["usuario", "premium", "admin"]),
   // passport.authenticate("github", { session: false }),
   ProductController.products
 );
-router.post("/", ProductController.addProduct);
-router.put("/:pid", ProductController.updateProduct);
-router.delete("/:pid", ProductController.deleteProduct);
+router.post(
+  "/",
+  ensureAuthenticated,
+  ensureAccess(["premium", "admin"]),
+  ProductController.addProduct
+);
+router.put(
+  "/:pid",
+  ensureAuthenticated,
+  ensureAccess(["premium", "admin"]),
+  ProductController.updateProduct
+);
+router.delete(
+  "/:pid",
+  ensureAuthenticated,
+  ensureAccess(["premium", "admin"]),
+  ProductController.deleteProduct
+);
 
 // router.get("/:pid", async (req, res) => {
 //   try {

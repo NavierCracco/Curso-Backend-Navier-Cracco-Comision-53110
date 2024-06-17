@@ -94,20 +94,30 @@ export class ProductController {
 
   static addProduct = async (req, res) => {
     const productData = req.body;
+    const owner = req.user.user._id;
+
+    if (productData.code === undefined) {
+      return res.status(400).json({ error: "Product code is required" });
+    }
 
     try {
       if (productData.code) {
-        const product = await productManager.getProducts({
-          code: productData.code,
-        });
-        if (product) {
-          throw new Error("Product code already exists");
+        const existingProduct = await productManager.getProductByCode(
+          productData.code
+        );
+        if (existingProduct) {
+          return res.status(400).json({ error: "Product code already exists" });
         }
       }
-      const newProduct = await productManager.addProduct(productData);
-      res.status(201).json(newProduct);
+      const newProduct = await productManager.addProduct({
+        ...productData,
+        owner,
+      });
+      res.status(201).json({ message: "Product adding", newProduct });
     } catch (error) {
-      res.status(400).json({ error: "Error adding product" });
+      res
+        .status(400)
+        .json({ error: "Error adding product", detalle: error.message });
     }
   };
 
@@ -130,11 +140,25 @@ export class ProductController {
       if (!product) {
         res.status(404).json({ error: "Product not found" });
       } else {
-        const updated = await productManager.updateProduct(pid, updatedProduct);
-        res.json({
-          message: "Product updated",
-          product: updated,
-        });
+        const user = await userDao.getById(req.user.user._id);
+        if (
+          user.role === "admin" ||
+          product.owner.toString() === user._id.toString()
+        ) {
+          const updated = await productManager.updateProduct(
+            pid,
+            updatedProduct
+          );
+          res.json({
+            message: "Product updated",
+            product: updated,
+          });
+        } else {
+          res.status(403).json({
+            error:
+              "Forbidden: You don't have permission to update this product",
+          });
+        }
       }
     } catch (error) {
       res.status(400).json({ error: "Error updating product" });
@@ -159,8 +183,23 @@ export class ProductController {
       if (!product) {
         res.status(404).json({ error: "Product not found" });
       } else {
-        await productManager.deleteProduct(pid);
-        res.json(`Product deleted with id: ${pid}`);
+        const user = await userDao.getById(req.user.user._id);
+        if (
+          product.owner.toString() === user._id.toString() ||
+          user.role === "admin"
+        ) {
+          const deleted = await productManager.deleteProduct(pid);
+
+          res.json({
+            message: "Product deleted",
+            product: deleted,
+          });
+        } else {
+          res.status(403).json({
+            error:
+              "Forbidden: You don't have permission to delete this product",
+          });
+        }
       }
     } catch (error) {
       res.status(500).json({ error: "Error deleting product" });

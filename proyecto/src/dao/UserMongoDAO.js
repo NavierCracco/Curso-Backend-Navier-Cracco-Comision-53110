@@ -12,4 +12,16 @@ export class UserMongoDao {
   async create(user) {
     return await User.create(user);
   }
+
+  async update(id, updates) {
+    return await User.findByIdAndUpdate(id, updates, { new: true }).lean();
+  }
+
+  async updatePassword(userId, password) {
+    return await User.findByIdAndUpdate(
+      userId,
+      { password },
+      { new: true }
+    ).lean();
+  }
 }

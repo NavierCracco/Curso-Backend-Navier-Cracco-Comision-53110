@@ -61,3 +61,11 @@ router.post("/register", SessionController.register);
 router.post("/login", SessionController.login);
 router.get("/logout", ensureAuthenticated, SessionController.logout);
 router.get("/current", ensureAuthenticated, SessionController.current);
+router.get("/forgotpassword", (req, res) => {
+  res.render("forgotPassword");
+});
+router.post("/resetpassword", SessionController.resetPassword);
+router.get("/resetpassword", (req, res) => {
+  res.render("resetPassword");
+});
+router.post("/createdpassword", SessionController.updatePassword);

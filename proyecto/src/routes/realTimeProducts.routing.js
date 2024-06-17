@@ -12,4 +12,9 @@ router.get(
   ensureAccess(["admin"]),
   RealTimeProductsController.getProducts
 );
-router.post("/realtimeproducts", RealTimeProductsController.addProduct);
+router.post(
+  "/realtimeproducts",
+  ensureAuthenticated,
+  ensureAccess(["admin"]),
+  RealTimeProductsController.addProduct
+);

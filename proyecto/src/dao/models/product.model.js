@@ -13,6 +13,12 @@ const productSchema = new Schema(
     category: { type: String },
     thumbnail: { type: String },
     quantity: { type: Number, default: 1 },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      require: [false],
+      default: "admin",
+    },
   },
   {
     timestamps: true,

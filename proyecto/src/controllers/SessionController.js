@@ -2,10 +2,11 @@ import { UserMongoDao as UserDao } from "../dao/UserMongoDAO.js";
 import { CartMongoDao as CartDao } from "../dao/CartMongoDAO.js";
 import { userService } from "../repository/usersService.js";
 import { config } from "../config/config.js";
+import { CustomError } from "../utils/customError.js";
+import { sendMail } from "../utils/sendMail.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { CustomError } from "../utils/customError.js";
-import { th } from "@faker-js/faker";
+import { ERRORS } from "../utils/EErrors.js";
 
 const userDao = new UserDao();
 const cartDao = new CartDao();
@@ -128,5 +129,72 @@ export class SessionController {
 
     res.setHeader("Content-Type", "application/json");
     res.status(200).json({ perfil: user });
+  };
+
+  static resetPassword = async (req, res) => {
+    const { email } = req.body;
+
+    let user = await userDao.getAll({ email });
+    if (!user) {
+      throw new CustomError({
+        name: "Not Found",
+        cause: "Invalid arguments",
+        message: "Not found",
+        code: ERRORS["NOT FOUND"],
+      });
+    }
+
+    delete user.password;
+    let token = jwt.sign({ user }, config.general.COOKIE_SECRET, {
+      expiresIn: "1h",
+    });
+    let url = `http://localhost:8080/api/sessions/resetpassword?token=${token}`;
+    let message = `Ha solicitado recuperar tu contraseña, haga click <a href=${url}>aquí</a> para continuar. Si no fue usted, contacte con el administrador.`;
+
+    try {
+      await sendMail(email, "recuperar contraseña", message);
+      res.redirect(
+        "/api/sessions/forgotpassword?message=recibira un email en breves"
+      );
+    } catch (error) {
+      throw new CustomError({
+        name: "Internal server error",
+        cause: "Internal server error",
+        message: "unexpected server error",
+        code: ERRORS["INTERNAL SERVER ERROR"],
+      });
+    }
+  };
+
+  static updatePassword = async (req, res) => {
+    const { token, password } = req.body;
+
+    try {
+      const decoded = jwt.verify(token, config.general.COOKIE_SECRET);
+      const user = await userService.getUserById(decoded.user._id);
+
+      if (!user) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "Invalid arguments",
+          message: "Not found",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await userDao.updatePassword(decoded.user._id, hashedPassword);
+
+      res.redirect(
+        "/api/sessions/login?message=contraseña creada exitosamente"
+      );
+    } catch (error) {
+      throw new CustomError({
+        name: "Internal server error",
+        cause: "Internal server error",
+        message: "unexpected server error",
+        code: ERRORS["INTERNAL SERVER ERROR"],
+      });
+    }
   };
 }

@@ -81,7 +81,7 @@ export class CartController {
         });
       }
 
-      if (!quantity || !price) {
+      if (typeof quantity !== "number" || typeof price !== "number") {
         throw new CustomError({
           name: "Bad request",
           cause: "quantity or price are invalid",
@@ -90,13 +90,35 @@ export class CartController {
         });
       }
 
-      const cart = await cartManager.addProductToCart(
-        cartId,
-        productId,
-        quantity,
-        price
-      );
-      res.json(cart);
+      const userId = req.user.user._id;
+      const product = await productManager.getProductById(productId);
+
+      if (!product.owner) {
+        const cart = await cartManager.addProductToCart(
+          cartId,
+          productId,
+          quantity,
+          price
+        );
+
+        res.json(cart);
+      } else if (userId.toString() !== product.owner.toString()) {
+        const cart = await cartManager.addProductToCart(
+          cartId,
+          productId,
+          quantity,
+          price
+        );
+
+        res.json(cart);
+      } else {
+        throw new CustomError({
+          name: "Bad request",
+          cause: "you can't add your own product to the cart",
+          message: "you can't add your own product to the cart",
+          code: ERRORS["BAD REQUEST"],
+        });
+      }
     } catch (error) {
       res
         .status(500)
