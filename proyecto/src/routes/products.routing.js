@@ -35,19 +35,3 @@ router.delete(
   ensureAccess(["premium", "admin"]),
   ProductController.deleteProduct
 );
-
-// router.get("/:pid", async (req, res) => {
-//   try {
-//     const id = req.params.pid; // extraemos el id del parámetro de la ruta
-//     const product = await productManager.getProductById(id); // intentamos obtener el producto por su id
-
-//     // Si el producto no existe, enviamos un mensaje de error con código 404
-//     if (!product) {
-//       res.status(404).json({ error: "Product not found" });
-//     } else {
-//       res.json(product); // si el producto existe, lo enviamos como respuesta
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: "Internal server error - 500" });
-//   }
-// });

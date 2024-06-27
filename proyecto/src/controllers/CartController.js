@@ -26,7 +26,7 @@ export class CartController {
   static getCarts = async (req, res) => {
     try {
       const carts = await cartManager.getCarts();
-      if (carts) {
+      if (!carts) {
         throw new CustomError({
           name: "Not Found",
           cause: "cartId or productId are invalid",
@@ -35,9 +35,11 @@ export class CartController {
         });
       }
 
-      res.json(carts);
+      res.status(200).json({ message: "carts", carts });
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
     }
   };
 
@@ -57,7 +59,7 @@ export class CartController {
       }
       const cart = await cartManager.getCartById(cartId);
       // console.log(cart);
-      res.json(cart);
+      res.status(200).json({ message: "cart found", cart });
     } catch (error) {
       res
         .status(500)
@@ -101,7 +103,7 @@ export class CartController {
           price
         );
 
-        res.json(cart);
+        res.status(200).json({ message: "Product added", cart });
       } else if (userId.toString() !== product.owner.toString()) {
         const cart = await cartManager.addProductToCart(
           cartId,
@@ -110,19 +112,16 @@ export class CartController {
           price
         );
 
-        res.json(cart);
+        res.json({ message: "Product added", cart });
       } else {
-        throw new CustomError({
-          name: "Bad request",
-          cause: "you can't add your own product to the cart",
-          message: "you can't add your own product to the cart",
-          code: ERRORS["BAD REQUEST"],
-        });
+        res
+          .status(400)
+          .json({ message: "you can't add your own product to the cart" });
       }
     } catch (error) {
       res
         .status(500)
-        .json({ error: "Internal server error", error: error.message });
+        .json({ message: "Internal server error", error: error.message });
     }
   };
 
@@ -155,11 +154,11 @@ export class CartController {
         productId,
         quantity
       );
-      res.json(cart);
+      res.status(200).json({ message: "Updated product quantity", cart });
     } catch (error) {
       res
         .status(500)
-        .json({ error: "Internal server error", error: error.message });
+        .json({ message: "Internal server error", error: error.message });
     }
   };
 
@@ -178,7 +177,7 @@ export class CartController {
         });
       }
       const cart = await cartManager.deleteProductCart(cartId, productId);
-      res.json(cart);
+      res.status(200).json({ message: "product removed from cart", cart });
     } catch (error) {
       res
         .status(500)
@@ -201,7 +200,7 @@ export class CartController {
         });
       }
       const cart = await cartManager.clearCart(cartId);
-      res.json(cart);
+      res.status(200).json({ message: "Empty cart", cart });
     } catch (error) {
       res
         .status(500)
@@ -256,7 +255,7 @@ export class CartController {
         });
 
         res.setHeader("Content-Type", "application/json");
-        res.json({
+        res.status(404).json({
           message: "Products without stock",
           itemsWithoutStock,
         });

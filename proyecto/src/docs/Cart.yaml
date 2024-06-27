@@ -1,0 +1,364 @@
+paths:
+  /cart/:
+    get:
+      summary: obtener todos los carritos de la DB
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: un listado de carritos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "carts"
+                  carts:
+                    type: array
+                    items:
+                      $ref: "#components/schemas/Cart"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /cart/{cartId}:
+    get:
+      summary: Obtener un carrito por su ID
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cartId
+          schema:
+            type: string
+          required: true
+          description: El ID del carrito a obtener
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
+      responses:
+        "200":
+          description: cart found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "cart found"
+                  cart:
+                    type: object
+                    $ref: "#components/schemas/Cart"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+    delete:
+      summary: Vaciar un carrito por su ID
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cartId
+          schema:
+            type: string
+          required: true
+          description: El ID del carrito que quieres vaciar
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
+      responses:
+        "200":
+          description: Carrito vacio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Empty cart"
+                  cart:
+                    type: object
+                    properties:
+                      _id:
+                        type: ObjectId
+                        example: "647d8e6e9b7c6"
+                      totalPrice:
+                        type: number
+                        example: 0
+                      products:
+                        type: array
+                        example: []
+                      userId:
+                        type: ObjectId
+                        example: "647d8e6e9b123"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /cart/{cartId}/product/{productId}:
+    post:
+      summary: Agregar un producto al carrito
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cartId
+          schema:
+            type: string
+          required: true
+          description: El ID del carrito
+        - in: path
+          name: productId
+          schema:
+            type: string
+          required: true
+          description: El ID del producto
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: number
+                  example: 2
+                price:
+                  type: number
+                  example: 10
+                  description: El precio del producto
+      responses:
+        "200":
+          description: Product added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product added"
+                  cart:
+                    type: object
+                    $ref: "#components/schemas/Cart"
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "you can't add your own product to the cart"
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+    delete:
+      summary: Eliminar un producto del carrito
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cartId
+          schema:
+            type: string
+          required: true
+          description: El ID del carrito
+        - in: path
+          name: productId
+          schema:
+            type: string
+          required: true
+          description: El ID del producto
+      responses:
+        "200":
+          description: Producto eliminado del carrito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product removed from cart"
+                  cart:
+                    type: object
+                    properties:
+                      _id:
+                        type: ObjectId
+                        example: "647d8e6e9b7c6"
+                      totalPrice:
+                        type: number
+                        example: 0
+                      products:
+                        type: array
+                        example: []
+                      userId:
+                        type: ObjectId
+                        example: "647d8e6e9b123"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+    put:
+      summary: Actualizar la cantidad de un producto en el carrito
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cartId
+          schema:
+            type: string
+          required: true
+          description: El ID del carrito
+        - in: path
+          name: productId
+          schema:
+            type: string
+          required: true
+          description: El ID del producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: number
+                  example: 2
+                  description: La cantidad del producto en el carrito
+      responses:
+        "200":
+          description: Cantidad de producto actualizada en el carrito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Updated product quantity"
+                  cart:
+                    type: object
+                    $ref: "#components/schemas/Cart"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /cart/{cartId}/purchase:
+    get:
+      summary: Comprar los productos del carrito
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cartId
+          schema:
+            type: string
+          required: true
+          description: El ID del carrito
+
+      responses:
+        "200":
+          description: Compra realizada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Purchase completed successfully"
+                  ticket:
+                    type: object
+                    $ref: "#components/schemas/Ticket"
+        "404":
+          description: Producto sin stock
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product out of stock"
+                  itemsWithoutStock:
+                    type: array
+                    items:
+                      type: object
+                      $ref: "#components/schemas/ProductCart"
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"

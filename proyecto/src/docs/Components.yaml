@@ -1,0 +1,230 @@
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por mongo
+        title:
+          type: string
+          description: Nombre del producto
+        description:
+          type: string
+          description: descripcion del producto
+        code:
+          type: string
+          description: codigo del producto
+        price:
+          type: string
+          description: precio del producto
+        status:
+          type: boolean
+          description: estado del producto
+        stock:
+          type: number
+          description: stock del producto
+        category:
+          type: string
+          description: categoria del producto
+        thumbnail:
+          type: string
+          description: url de la imagen del producto
+        quantity:
+          type: number
+          description: cantidad del producto, por defecto 1
+        owner:
+          type: ObjectId
+          description: Id del usuario que creo el producto
+      example:
+        _id: ObjectId("60acc54545c8e82e0475f73a")
+        title: producto de prueba
+        description: Este es un producto prueba
+        code: "ABC123"
+        price: 200
+        status: true
+        stock: 25
+        category: "categoria de prueba"
+        thumbnail: "url/pruebas"
+        quantity: 1
+        owner: ObjectId("662c3864befe6d20b1552398")
+    User:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por mongo
+        first_name:
+          type: string
+          description: Nombre del usuario
+        last_name:
+          type: string
+          description: Apellido del usuario
+        email:
+          type: string
+          description: Correo del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+        age:
+          type: number
+          description: Edad del usuario
+        role:
+          type: string
+          description: Rol del usuario
+        cart:
+          type: ObjectId
+          description: Id del carrito del usuario
+      example:
+        _id: ObjectId("60acc54545c8e82e0475f73a")
+        first_name: Marcelo
+        last_name: Gallardo
+        email: elmuñe@gmail.com
+        password: "91218"
+        age: 43
+        role: "user"
+        cart: ObjectId("09acc1289c8e82e0418f73v")
+
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id del carrito generado por MongoDB
+        totalPrice:
+          type: number
+          description: Precio total de los productos en el carrito, default 0
+        products:
+          type: array
+          description: Lista de productos
+          productId:
+            type: object
+            $ref: "#/components/schemas/Product"
+        userId:
+          type: ObjectId
+          description: Id del usuario que creo el carrito
+
+      example:
+        _id: ObjectId("6670a03928a18619c6e6835b")
+        totalPrice: 1400
+        products:
+          - productId:
+              _id: ObjectId("2222a03928a18619c6e6835b")
+              title: "producto de prueba"
+              description: "Este es un producto prueba"
+              code: "ABC123"
+              price: 200
+              status: true
+              stock: 25
+              category: "categoria de prueba"
+              thumbnail: "url/pruebas"
+              quantity: 1
+              owner: ObjectId("662c3864befe6d20b1552398")
+            quantity: 3
+            price: 600
+          - productId:
+              _id: ObjectId("3333a03928a18619c6e6835b")
+              title: "producto de prueba"
+              description: "Este es un producto prueba"
+              code: "ABC123"
+              price: 400
+              status: true
+              stock: 25
+              category: "categoria de prueba"
+              thumbnail: "url/pruebas"
+              quantity: 2
+              owner: ObjectId("662c3864befe6d20b1552398")
+            quantity: 3
+            price: 800
+        userId: ObjectId("3333a03928a18619c6e6835b")
+
+    Ticket:
+      tipe: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por mongo
+        code:
+          type: string
+          description: Codigo del ticket
+        amount:
+          type: number
+          description: Monto total de la compra
+        purchaser:
+          type: string
+          description: Email del comprador
+        purchase_datetime:
+          type: string
+          description: Fecha y hora de la compra
+      example:
+        _id: ObjectId("60acc54545c8e82e0475f73a")
+        code: "123456"
+        amount: 100
+        purchaser: "ticketemail@example.com"
+        purchase_datetime: "2023-05-25 12:34:56"
+
+  requestBodies:
+    createProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Nombre del producto
+        description:
+          type: string
+          description: descripcion del producto
+        code:
+          type: string
+          description: codigo del producto
+        price:
+          type: string
+          description: precio del producto
+        status:
+          type: boolean
+          description: estado del producto
+        stock:
+          type: number
+          description: stock del producto
+        category:
+          type: string
+          description: categoria del producto
+        thumbnail:
+          type: string
+          description: url de la imagen del producto
+      example:
+        title: creando un producto
+        description: creando un producto de prueba
+        code: "ABC123PRUEBA"
+        price: 200
+        stock: 25
+        category: "creando producto"
+        thumbnail: "url/creando-producto"
+    updateProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Nombre del producto
+        description:
+          type: string
+          description: descripcion del producto
+        code:
+          type: string
+          description: codigo del producto
+        price:
+          type: string
+          description: precio del producto
+        status:
+          type: boolean
+          description: estado del producto
+        stock:
+          type: number
+          description: stock del producto
+        category:
+          type: string
+          description: categoria del producto
+        thumbnail:
+          type: string
+          description: url de la imagen del producto
+      example:
+        title: actualizando un producto

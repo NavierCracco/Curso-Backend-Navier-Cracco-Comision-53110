@@ -50,7 +50,7 @@ export class ProductController {
     } catch (error) {
       res
         .status(500)
-        .json({ error: "Internal server error - 500", error: error.message });
+        .json({ message: "Internal server error", error: error.message });
     }
   };
 
@@ -86,7 +86,7 @@ export class ProductController {
     } catch (error) {
       res
         .status(500)
-        .json({ error: "Error getting products", error: error.message });
+        .json({ message: "Error getting products", error: error.message });
     }
   };
 
@@ -113,7 +113,7 @@ export class ProductController {
         ...productData,
         owner,
       });
-      res.status(201).json({ message: "Product adding", newProduct });
+      res.status(201).json({ message: "Product added", newProduct });
     } catch (error) {
       res
         .status(400)
@@ -143,7 +143,7 @@ export class ProductController {
         const user = await userDao.getById(req.user.user._id);
         if (
           user.role === "admin" ||
-          product.owner.toString() === user._id.toString()
+          product.owner.toString() == user._id.toString()
         ) {
           const updated = await productManager.updateProduct(
             pid,
@@ -161,7 +161,9 @@ export class ProductController {
         }
       }
     } catch (error) {
-      res.status(400).json({ error: "Error updating product" });
+      res
+        .status(400)
+        .json({ message: "Error updating product", error: error.message });
     }
   };
 
@@ -190,7 +192,7 @@ export class ProductController {
         ) {
           const deleted = await productManager.deleteProduct(pid);
 
-          res.json({
+          res.status(200).json({
             message: "Product deleted",
             product: deleted,
           });
@@ -202,7 +204,9 @@ export class ProductController {
         }
       }
     } catch (error) {
-      res.status(500).json({ error: "Error deleting product" });
+      res
+        .status(400)
+        .json({ message: "Error deleting product", error: error.message });
     }
   };
 }

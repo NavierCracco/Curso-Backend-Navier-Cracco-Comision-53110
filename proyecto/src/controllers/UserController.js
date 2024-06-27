@@ -32,13 +32,13 @@ export class UserController {
 
       res.json({ message: "Role updated successfully" });
     } catch (error) {
-      console.log(error);
-      //   throw new CustomError({
-      //     name: "Internal server error",
-      //     cause: "Internal server error",
-      //     message: "unexpected server error",
-      //     code: ERRORS["INTERNAL SERVER ERROR"],
-      //   });
+      // console.log(error);
+      throw new CustomError({
+        name: "Internal server error",
+        cause: "Internal server error",
+        message: "unexpected server error",
+        code: ERRORS["INTERNAL SERVER ERROR"],
+      });
     }
   };
 }

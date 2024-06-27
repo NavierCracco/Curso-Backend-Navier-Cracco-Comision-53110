@@ -4,6 +4,8 @@ import __dirname from "./utils/utils.js";
 import path from "path";
 import passport from "passport";
 import cookieParser from "cookie-parser";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 import { engine } from "express-handlebars";
 import { Server } from "socket.io";
 import { router as productRouter } from "./routes/products.routing.js";
@@ -21,6 +23,20 @@ import { middlewareLogger } from "./middlewares/middlewareLogger.js";
 import { developmentLogger } from "./utils/winstonConfig.js";
 
 const app = express();
+
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Ecommerce API",
+      version: "1.0.0",
+      description: "A simple Ecommerce API",
+    },
+  },
+  apis: [`./src/docs/*.yaml`],
+};
+const swaggerSpec = swaggerJSDoc(options);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(config.general.COOKIE_SECRET));
@@ -39,6 +55,7 @@ app.use("/", adminRouter);
 app.use("/mockingproducts", mockingRouter);
 app.use("/loggertest", loggerRouter);
 app.use("/api/users", usersRouter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
