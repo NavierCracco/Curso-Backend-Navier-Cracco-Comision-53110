@@ -268,7 +268,7 @@ export class CartController {
         await ticket.save();
         await cartManager.clearCart(cartId);
 
-        res.json({
+        res.status(200).json({
           message: "Purchase completed successfully",
           ticket,
         });

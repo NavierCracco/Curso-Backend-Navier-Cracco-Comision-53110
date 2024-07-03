@@ -81,7 +81,7 @@ export class ProductController {
           sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
         }
       ).lean();
-
+      // res.status(200).json({ message: "products", products, usuario });
       res.render("products", { products, usuario });
     } catch (error) {
       res
@@ -149,7 +149,7 @@ export class ProductController {
             pid,
             updatedProduct
           );
-          res.json({
+          res.status(200).json({
             message: "Product updated",
             product: updated,
           });
@@ -205,7 +205,7 @@ export class ProductController {
       }
     } catch (error) {
       res
-        .status(400)
+        .status(500)
         .json({ message: "Error deleting product", error: error.message });
     }
   };

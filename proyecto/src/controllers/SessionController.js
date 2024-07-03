@@ -116,7 +116,7 @@ export class SessionController {
         res.redirect("/api/sessions/login");
       }
     } catch (error) {
-      res.status(500).json("Error al cerrar sesión");
+      res.status(500).json({ error: "Error al cerrar sesión" });
     }
   };
 
@@ -134,35 +134,32 @@ export class SessionController {
   static resetPassword = async (req, res) => {
     const { email } = req.body;
 
-    let user = await userDao.getAll({ email });
-    if (!user) {
-      throw new CustomError({
-        name: "Not Found",
-        cause: "Invalid arguments",
-        message: "Not found",
-        code: ERRORS["NOT FOUND"],
-      });
-    }
-
-    delete user.password;
-    let token = jwt.sign({ user }, config.general.COOKIE_SECRET, {
-      expiresIn: "1h",
-    });
-    let url = `http://localhost:8080/api/sessions/resetpassword?token=${token}`;
-    let message = `Ha solicitado recuperar tu contraseña, haga click <a href=${url}>aquí</a> para continuar. Si no fue usted, contacte con el administrador.`;
-
     try {
+      let user = await userDao.getAll({ email });
+      if (!user) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "Invalid arguments",
+          message: "User not found",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
+
+      delete user.password;
+      let token = jwt.sign({ user }, config.general.COOKIE_SECRET, {
+        expiresIn: "1h",
+      });
+      let url = `http://localhost:8080/api/sessions/resetpassword?token=${token}`;
+      let message = `Ha solicitado recuperar tu contraseña, haga click <a href=${url}>aquí</a> para continuar. Si no fue usted, contacte con el administrador.`;
+
       await sendMail(email, "recuperar contraseña", message);
       res.redirect(
         "/api/sessions/forgotpassword?message=recibira un email en breves"
       );
     } catch (error) {
-      throw new CustomError({
-        name: "Internal server error",
-        cause: "Internal server error",
-        message: "unexpected server error",
-        code: ERRORS["INTERNAL SERVER ERROR"],
-      });
+      res
+        .status(500)
+        .json({ message: "Error al enviar email", error: error.message });
     }
   };
 
@@ -177,7 +174,7 @@ export class SessionController {
         throw new CustomError({
           name: "Not Found",
           cause: "Invalid arguments",
-          message: "Not found",
+          message: " User not found",
           code: ERRORS["NOT FOUND"],
         });
       }
@@ -186,14 +183,12 @@ export class SessionController {
       await userDao.updatePassword(decoded.user._id, hashedPassword);
 
       res.redirect(
-        "/api/sessions/login?message=contraseña creada exitosamente"
+        "/api/sessions/login?message=contrasena creada exitosamente"
       );
     } catch (error) {
-      throw new CustomError({
-        name: "Internal server error",
-        cause: "Internal server error",
-        message: "unexpected server error",
-        code: ERRORS["INTERNAL SERVER ERROR"],
+      res.status(500).json({
+        message: "Error al actualizar la contraseña",
+        error: error.message,
       });
     }
   };
