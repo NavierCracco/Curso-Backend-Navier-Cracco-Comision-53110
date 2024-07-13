@@ -36,6 +36,13 @@ const UserSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Cart",
     },
+    documents: [
+      {
+        name: String,
+        reference: String,
+      },
+    ],
+    last_connection: Date,
   },
   { timestamps: true, strict: false }
 );

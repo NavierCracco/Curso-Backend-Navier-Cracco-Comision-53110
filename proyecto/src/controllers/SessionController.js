@@ -7,7 +7,6 @@ import { sendMail } from "../utils/sendMail.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { ERRORS } from "../utils/EErrors.js";
-
 const userDao = new UserDao();
 const cartDao = new CartDao();
 
@@ -65,8 +64,9 @@ export class SessionController {
 
   static login = async (req, res) => {
     const { email, password } = req.body;
-    let user = await userDao.getAll({ email });
-    if (!user) {
+
+    let users = await userDao.getAll({ email });
+    if (!users) {
       throw new CustomError({
         name: "Not Found",
         cause: "Invalid arguments",
@@ -74,6 +74,8 @@ export class SessionController {
         code: ERRORS["NOT FOUND"],
       });
     }
+
+    let user = users[0];
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
@@ -85,6 +87,9 @@ export class SessionController {
       });
     }
 
+    user.last_connection = new Date();
+    await userDao.update(user._id, { last_connection: user.last_connection });
+
     user = {
       _id: user._id,
       first_name: user.first_name,
@@ -92,10 +97,13 @@ export class SessionController {
       email: user.email,
       age: user.age,
       role: user.role,
+      documents: user.documents,
+      last_connection: user.last_connection,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
     delete user.password;
+    delete user.documents;
 
     const token = jwt.sign({ user }, config.general.COOKIE_SECRET, {
       expiresIn: "24h",
@@ -109,9 +117,16 @@ export class SessionController {
 
   /// ****  LOGOUT  **** ///
 
-  static logout = (req, res) => {
+  static logout = async (req, res) => {
     try {
       if (req.user) {
+        let user = await userDao.getAll({ email: req.user.user.email });
+
+        user.last_connection = new Date();
+        await userDao.update(user._id, {
+          last_connection: user.last_connection,
+        });
+
         res.clearCookie(config.general.COOKIE_SECRET);
         res.redirect("/api/sessions/login");
       }

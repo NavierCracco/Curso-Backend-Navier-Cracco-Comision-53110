@@ -1,0 +1,26 @@
+<div class="navbar-container">
+  <h2 class="title">Subir Documentos </h2>
+  <div class="navbar">
+    <a href="/"> Home Page</a>
+    <a href="/api/products/products"></a>
+    <a href="/cart/{{usuario.cart}}">Cart</a>
+    <a href="/api/sessions/logout">Logout</a>
+  </div>
+</div>
+
+<br />
+<hr />
+<br />
+
+<form
+  action="/api/users/666f62cec5ba9dde9455f107/documents"
+  method="post"
+  enctype="multipart/form-data"
+>
+
+  <input type="file" name="documents[]" multiple />
+  <button type="submit">Subir documentos</button>
+
+</form>
+<br />
+<script src="/js/uploadDocuments.js"></script>

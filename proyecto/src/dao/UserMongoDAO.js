@@ -2,7 +2,11 @@ import { User } from "./models/user.model.js";
 
 export class UserMongoDao {
   async getAll(filter = {}) {
-    return await User.findOne(filter).lean();
+    return await User.find(filter).lean();
+  }
+
+  async getAllUsers() {
+    return await User.find().lean();
   }
 
   async getById(id) {
