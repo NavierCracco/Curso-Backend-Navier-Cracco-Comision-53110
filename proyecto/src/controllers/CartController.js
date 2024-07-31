@@ -1,27 +1,26 @@
 import { CartMongoDao } from "../dao/CartMongoDAO.js";
 import { ProductMongoDao } from "../dao/ProductsMongoDAO.js";
 import { UserMongoDao } from "../dao/UserMongoDAO.js";
+import { TicketMongoDao } from "../dao/TicketMongoDao.js";
 import { Ticket } from "../dao/models/ticket.model.js";
 import { ERRORS } from "../utils/EErrors.js";
 import { CustomError } from "../utils/customError.js";
+import { sendMail } from "../utils/sendMail.js";
 
 const cartManager = new CartMongoDao();
 const productManager = new ProductMongoDao();
 const userManager = new UserMongoDao();
+const ticketManager = new TicketMongoDao();
 
 export class CartController {
-  /// **** CREATE CART  **** ///
-
   static createCart = async (req, res) => {
     try {
       const cart = await cartManager.createCart();
-      res.json(cart);
+      res.status(200).json({ cart: cart });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   };
-
-  /// **** GET ALL CARTS **** ///
 
   static getCarts = async (req, res) => {
     try {
@@ -43,8 +42,6 @@ export class CartController {
     }
   };
 
-  /// **** GET CART BY ID **** ///
-
   static getCartById = async (req, res) => {
     const { cartId } = req.params;
 
@@ -57,8 +54,9 @@ export class CartController {
           code: ERRORS["NOT FOUND"],
         });
       }
+
       const cart = await cartManager.getCartById(cartId);
-      // console.log(cart);
+
       res.status(200).json({ message: "cart found", cart });
     } catch (error) {
       res
@@ -67,18 +65,45 @@ export class CartController {
     }
   };
 
-  /// **** ADD PRODUCT TO CART **** ///
+  static getCartByIdRenderPage = async (req, res) => {
+    const { cartId } = req.params;
+
+    try {
+      if (!cartId) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "invalid arguments",
+          message: "Cart not found",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
+      const cart = await cartManager.getCartById(cartId);
+      const isEmpty = cart.products.length === 0;
+
+      const userId = cart.userId;
+      const user = await userManager.getById(userId);
+      delete user.password;
+      delete user.documents;
+
+      res.render("cart", { cart, user, isEmpty });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Internal server error", error: error.message });
+    }
+  };
 
   static addProductToCart = async (req, res) => {
     const { cartId, productId } = req.params;
     const { quantity, price } = req.body;
+    const userId = req.user._id;
 
     try {
       if (!cartId || !productId) {
         throw new CustomError({
           name: "Not Found",
           cause: "cartId or productId are invalid",
-          message: "invalid arguments",
+          message: "Cart or product not found",
           code: ERRORS["NOT FOUND"],
         });
       }
@@ -92,7 +117,6 @@ export class CartController {
         });
       }
 
-      const userId = req.user.user._id;
       const product = await productManager.getProductById(productId);
 
       if (!product.owner) {
@@ -124,8 +148,6 @@ export class CartController {
         .json({ message: "Internal server error", error: error.message });
     }
   };
-
-  /// **** UPDATE PRODUCT QUANTITY **** ///
 
   static updateProductQuantity = async (req, res) => {
     const { cartId, productId } = req.params;
@@ -162,8 +184,6 @@ export class CartController {
     }
   };
 
-  /// **** DELETE PRODUCT FROM CART **** ///
-
   static deleteProductCart = async (req, res) => {
     const { cartId, productId } = req.params;
 
@@ -172,20 +192,30 @@ export class CartController {
         throw new CustomError({
           name: "Not Found",
           cause: "cartId or productId are invalid",
-          message: "invalid arguments",
+          message: "Cart or product not found",
           code: ERRORS["NOT FOUND"],
         });
       }
-      const cart = await cartManager.deleteProductCart(cartId, productId);
-      res.status(200).json({ message: "product removed from cart", cart });
+
+      const product = await productManager.getProductById(productId);
+      const deletedCart = await cartManager.deleteProductCart(
+        cartId,
+        productId
+      );
+
+      deletedCart.totalPrice -= product.price * product.quantity;
+      let updatedCart = await cartManager.updateCart(cartId, deletedCart);
+
+      res.status(200).json({
+        message: "Product removed from cart",
+        updatedCart,
+      });
     } catch (error) {
       res
         .status(500)
         .json({ error: "Internal server error", error: error.message });
     }
   };
-
-  /// **** CLEAR CART **** ///
 
   static clearCart = async (req, res) => {
     const { cartId } = req.params;
@@ -200,6 +230,9 @@ export class CartController {
         });
       }
       const cart = await cartManager.clearCart(cartId);
+
+      cart.totalPrice = 0;
+
       res.status(200).json({ message: "Empty cart", cart });
     } catch (error) {
       res
@@ -207,8 +240,6 @@ export class CartController {
         .json({ error: "Internal server error", error: error.message });
     }
   };
-
-  /// **** FINALIZAR COMPRA **** ///
 
   static finalizePurchase = async (req, res) => {
     const { cartId } = req.params;
@@ -218,7 +249,7 @@ export class CartController {
         throw new CustomError({
           name: "Not Found",
           cause: "invalid cartId",
-          message: "invalid argument",
+          message: "Cart not found",
           code: ERRORS["NOT FOUND"],
         });
       }
@@ -226,7 +257,6 @@ export class CartController {
 
       let userId = await userManager.getById(cart.userId);
       let userEmail = userId.email;
-      // console.log(userEmail);
 
       const itemsWithStock = [];
       const itemsWithoutStock = [];
@@ -235,48 +265,174 @@ export class CartController {
         let product = await productManager.getProductById(item.productId._id);
 
         if (product && product.stock > 0) {
-          product.stock -= item.quantity;
-
-          await productManager.updateProduct(item.productId._id, product);
           itemsWithStock.push(product);
         } else {
           itemsWithoutStock.push(item.productId._id);
         }
       }
 
-      cart.products = cart.products.filter(
-        (p) => !itemsWithoutStock.includes(p.productId)
-      );
-
-      if (itemsWithoutStock.length > 0) {
-        itemsWithoutStock.forEach(async (id) => {
-          let product = await productManager.getProductById(id);
-          itemsWithStock.push(product);
-        });
-
-        res.setHeader("Content-Type", "application/json");
-        res.status(404).json({
-          message: "Products without stock",
+      if (itemsWithoutStock > 0) {
+        return res.status(400).json({
+          message: "Some products are out of stock.",
           itemsWithoutStock,
         });
-      } else {
-        const ticket = new Ticket({
-          code: Date.now(),
-          amount: cart.totalPrice,
-          purchaser: userEmail,
-        });
-        await ticket.save();
-        await cartManager.clearCart(cartId);
-
-        res.status(200).json({
-          message: "Purchase completed successfully",
-          ticket,
-        });
       }
+
+      const ticket = new Ticket({
+        code: Date.now(),
+        amount: cart.totalPrice,
+        purchaser: userEmail,
+      });
+      await ticket.save();
+
+      if (cart.products.length === 0) {
+        cart.totalPrice = 0;
+      }
+
+      res.status(200).json({
+        message: "Ticket generated correctly.",
+        ticket,
+      });
     } catch (error) {
       res
         .status(500)
         .json({ error: "Internal server error", error: error.message });
+    }
+  };
+
+  static showPurchaseTicket = async (req, res) => {
+    const { ticketId } = req.params;
+    const userId = req.user._id;
+
+    try {
+      const user = await userManager.getById(userId);
+      delete user.password;
+      delete user.documents;
+
+      const ticket = await ticketManager.getTicketById(ticketId);
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      res.render("ticket", { ticket, user });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Internal server error", error: error.message });
+    }
+  };
+
+  static finalizedPurchase = async (req, res) => {
+    const { ticketId } = req.params;
+    const userId = req.user._id;
+
+    try {
+      const user = await userManager.getById(userId);
+      const cart = await cartManager.getCartById(user.cart);
+
+      const ticket = await ticketManager.getTicketById(ticketId);
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      const sendPurchaseEmail = async (user) => {
+        const subject = "Compra realizada";
+        const message = `<h1>Hola ${user.first_name}!</h1>
+        <p>Tu compra ha sido realizada con exito.</p>
+        <h3>Ticket: </h3>
+        <ul>
+        <p><strong>Código:</strong> ${ticket.code}</p>
+        <hr />
+        <p><strong>Productos: </strong></p>
+        <ul>
+        ${cart.products
+          .map(
+            (item) =>
+              `<li><strong>${item.productId.title}</strong> - <strong>Cantidad: </strong>${item.quantity} - <strong>Precio: </strong>$${item.productId.price}</li>`
+          )
+          .join("")}
+          </ul>
+        <hr />
+        <p><strong>Precio final:</strong> $${ticket.amount}</p>
+        </ul>
+        <p>Gracias por tu compra!</p>`;
+        await sendMail(user.email, subject, message);
+      };
+      sendPurchaseEmail(user);
+
+      if (!sendPurchaseEmail) {
+        return res.status(500).json({ message: "Error sending email" });
+      } else {
+        await ticketManager.updateTicket(ticketId, { payment_made: true });
+      }
+
+      const tickets = await ticketManager.getTicketByFilter({
+        purchaser: ticket.purchaser,
+      });
+      tickets.forEach(async (ticket) => {
+        if (ticket.payment_made === false) {
+          await ticketManager.deleteTicket(ticket._id);
+        }
+      });
+
+      for (let item of cart.products) {
+        let product = await productManager.getProductById(item.productId._id);
+        product.stock -= item.quantity;
+        await productManager.updateProduct(item.productId._id, product);
+      }
+      await cartManager.clearCart(cart._id);
+
+      res
+        .status(200)
+        .json({ message: "Purchase completed successfully", ticket });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Internal server error", error: error.message });
+    }
+  };
+
+  static deleteCarts = async (req, res) => {
+    try {
+      const allUsers = await userManager.getAllUsers();
+
+      const allCarts = await cartManager.getCarts();
+
+      const validUsersIds = new Set(
+        allUsers.map((user) => user._id.toString())
+      );
+
+      const cartsToDelete = allCarts
+        .filter((cart) => {
+          return !cart.userId || !validUsersIds.has(cart.userId.toString());
+        })
+        .map((cart) => {
+          return cart._id.toString();
+        });
+
+      if (cartsToDelete.length === 0) {
+        return res.status(404).json({ message: "No carts to delete" });
+      }
+
+      const deletedCarts = await cartManager.deleteCarts(cartsToDelete);
+
+      return res
+        .status(200)
+        .json({ message: "Carts deleted successfully", deletedCarts });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  };
+
+  static deleteTickets = async (req, res) => {
+    try {
+      const deletedTickets = await ticketManager.deleteTickets();
+
+      return res.status(200).json({
+        message: `${deletedTickets.deletedCount} tickets deleted successfully`,
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   };
 }

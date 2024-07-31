@@ -1,0 +1,57 @@
+<div class="navbar-container">
+  <h2 class="title">Administrador de usuarios </h2>
+  <a href="/"> Home Page</a>
+  <a href="/realtimeproducts">Administrar productos</a>
+</div>
+
+<br />
+<hr />
+
+{{#if usuario}}
+  <p id="user-id" data-id="{{usuario._id}}">Bienvenido de vuelta,
+    {{usuario.role}}:
+    {{usuario.first_name}}
+    {{usuario.last_name}}</p>
+{{/if}}
+
+<br />
+
+<h3>lista de usuarios:</h3>
+<div id="user-list" class="list-container">
+  {{#each users}}
+    <ul id="{{this._id}}">
+      <p class="title-product"><strong>Nombre y apellido: </strong>
+        {{this.first_name}}
+        {{this.last_name}}</p>
+      <p><strong>Email: </strong>{{this.email}}</p>
+      <p><strong>Rol: </strong>{{this.role}}</p>
+      <form
+        id="role-update-form"
+        action="/api/users/premium/{{this._id}}"
+        method="POST"
+      >
+        <input type="hidden" name="_method" value="PUT" />
+        <select name="role">
+          <option value="usuario">Usuario</option>
+          <option value="premium">Premium</option>
+          <option value="admin">Administrador</option>
+        </select>
+        <button type="submit">Actualizar Rol</button>
+      </form>
+      <form
+        id="delete-user-form"
+        action="/api/users/delete/{{this._id}}"
+        method="post"
+      >
+        <button type="submit">Borrar usuario</button>
+      </form>
+      <br />
+      <hr />
+    </ul>
+  {{/each}}
+
+</div>
+<br />
+<br />
+
+<script src="/js/adminUsers.js"></script>

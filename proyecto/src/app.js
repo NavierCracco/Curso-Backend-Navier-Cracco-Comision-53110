@@ -8,13 +8,17 @@ import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { engine } from "express-handlebars";
 import { Server } from "socket.io";
-import { router as productRouter } from "./routes/products.routing.js";
-import { router as cartRouter } from "./routes/cart.routing.js";
-import { router as adminRouter } from "./routes/realTimeProducts.routing.js";
-import { router as sessionsRouter } from "./routes/session.routing.js";
+import { router as productApiRouter } from "./routes/api/products.routing.js";
+import { router as cartApiRouter } from "./routes/api/cart.routing.js";
+import { router as sessionsApiRouter } from "./routes/api/session.routing.js";
+import { router as usersApiRouter } from "./routes/api/users.routing.js";
+import { router as homeViewRouter } from "./routes/views/home.routing.js";
+import { router as productViewRouter } from "./routes/views/products.routing.js";
+import { router as cartViewRouter } from "./routes/views/cart.routing.js";
+import { router as sessionsViewRouter } from "./routes/views/session.routing.js";
+import { router as adminRouter } from "./routes/views/admin.routing.js";
 import { router as mockingRouter } from "./routes/mock.routing.js";
 import { router as loggerRouter } from "./routes/loggerTest.routing.js";
-import { router as usersRouter } from "./routes/users.routing.js";
 import { ProductMongoDao } from "./dao/ProductsMongoDAO.js";
 import { initPassport } from "./config/passport.config.js";
 import { config } from "./config/config.js";
@@ -48,13 +52,26 @@ app.use(express.static(path.join(__dirname, "../public")));
 const productsManager = new ProductMongoDao();
 
 app.use(middlewareLogger);
-app.use("/api/products", productRouter);
-app.use("/cart", cartRouter);
-app.use("/api/sessions", sessionsRouter);
-app.use("/", adminRouter);
+
+// Routes of API
+app.use("/api/products", productApiRouter);
+app.use("/api/cart", cartApiRouter);
+app.use("/api/sessions", sessionsApiRouter);
+app.use("/api/users", usersApiRouter);
+
+// Routes of views
+app.use("/", homeViewRouter);
+app.use("/products", productViewRouter);
+app.use("/cart", cartViewRouter);
+app.use("/sessions", sessionsViewRouter);
+app.use("/admin", adminRouter);
+app.use("*", (req, res) => {
+  res.status(404).send({ error: "Page not found" });
+});
+
 app.use("/mockingproducts", mockingRouter);
 app.use("/loggertest", loggerRouter);
-app.use("/api/users", usersRouter);
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.engine("handlebars", engine());
@@ -64,12 +81,9 @@ app.use(handleError);
 
 const PORT = config.general.PORT;
 const server = app.listen(PORT, () => {
-  // console.log(
-  //   `Server running on port http://localhost:${PORT}/api/sessions/login`
-  // );
   if (config.general.MODE !== "production") {
     developmentLogger.info(
-      `Server running on port http://localhost:${PORT}/api/sessions/login`
+      `Server running on port http://localhost:${PORT}/sessions/login`
     );
   }
 });
@@ -79,12 +93,10 @@ export const io = new Server(server);
 const connect = async () => {
   try {
     await mongoose.connect(config.db.URL);
-    // console.log("DB connected!");
     if (config.general.MODE !== "production") {
       developmentLogger.info("DB connected!");
     }
   } catch (error) {
-    // console.log("faiulure connection to DB. Detail:", error.message);
     developmentLogger.error(
       "faiulure connection to DB. Detail:",
       error.message

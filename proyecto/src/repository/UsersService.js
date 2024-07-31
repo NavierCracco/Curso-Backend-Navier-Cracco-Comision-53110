@@ -8,7 +8,6 @@ class UsersService {
 
   async getUserById(id) {
     const user = await this.dao.getById(id);
-    // console.log(user);
     if (user) {
       return new UsersDTO(user);
     }

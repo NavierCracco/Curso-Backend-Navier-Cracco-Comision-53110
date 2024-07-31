@@ -13,7 +13,8 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     });
     const result = await response.json();
     console.log(result);
+    window.location.href = "/";
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 });

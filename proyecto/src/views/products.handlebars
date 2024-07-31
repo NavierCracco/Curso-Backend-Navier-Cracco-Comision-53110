@@ -1,21 +1,28 @@
 <div class="navbar-container">
   <h2 class="title">Productos </h2>
   <div class="navbar">
-    <a href="/"> Home Page</a>
-    <a href="/cart/{{usuario.cart}}">Cart</a>
-    <a href="/api/sessions/logout">Logout</a>
+    {{#if adminUser}}
+      <a href="/"> Home Page</a>
+      <a href="/sessions/logout">Logout</a>
+    {{else}}
+      <a href="/"> Home Page</a>
+      <a href="/cart/{{user.cart}}">Cart</a>
+      <a href="/sessions/logout">Logout</a>
+    {{/if}}
   </div>
 </div>
 
 <hr />
 <br />
 
-{{#if usuario}}
-  <p id="welcome-message" data-cart="{{usuario.cart}}">Bienvenido,
-    {{usuario.role}}:
-    {{usuario.first_name}}
-    {{usuario.last_name}}</p>
-{{/if}}
+<p
+  id="welcome-message"
+  data-userid="{{user._id}}"
+  data-cart="{{user.cart}}"
+>Bienvenido,
+  {{user.role}}:
+  {{user.first_name}}
+  {{user.last_name}}</p>
 
 <br />
 <div id="product-list" class="list-container">
@@ -26,7 +33,12 @@
       <li id="price" data-price="{{price}}">${{price}}</li>
       <li><strong>Descripción:</strong> {{description}}</li>
       <li><strong>Categoría:</strong> {{category}}</li>
-      <button type="button" class="btn-add-cart" data-id="{{_id}}">🛒</button>
+      <button
+        type="button"
+        class="btn-add-cart"
+        data-owner="{{owner}}"
+        data-id="{{_id}}"
+      >🛒</button>
     </ul>
 
   {{/each}}

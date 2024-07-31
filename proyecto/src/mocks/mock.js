@@ -12,5 +12,6 @@ export const generateMockProduct = () => {
     category: faker.commerce.department(),
     thumbnail: faker.image.url(),
     quantity: 1,
+    owner: faker.string.uuid(),
   };
 };

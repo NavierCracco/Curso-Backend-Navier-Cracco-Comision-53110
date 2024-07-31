@@ -15,7 +15,6 @@ export class CartManager {
     }
   }
 
-  // Agregamos un nuevo carrito y retornamos el carrito creado.
   async addCart() {
     let id = Date.now();
 
@@ -29,7 +28,6 @@ export class CartManager {
     return newCart;
   }
 
-  // Retornamos un array con los productos del carrito con el id especificado.
   async getCartById(cid) {
     const cart = this.carts.find((cart) => cart.id === cid);
     if (!cart) {
@@ -38,7 +36,6 @@ export class CartManager {
     return cart.products;
   }
 
-  // Agregamos un producto al carrito con el id especificado. Si el producto ya existe, se incrementa la cantidad. Si no existe, se agrega al carrito.
   async addProductToCart(cartId, productId, quantity = 1) {
     const cart = this.carts.find((cart) => cart.id === cartId);
     if (!cart) {

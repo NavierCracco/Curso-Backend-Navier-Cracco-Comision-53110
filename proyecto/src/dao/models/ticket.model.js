@@ -15,6 +15,10 @@ const ticketSchema = new Schema(
       type: String,
       required: true,
     },
+    payment_made: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

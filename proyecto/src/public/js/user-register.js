@@ -15,6 +15,7 @@ document
       });
       const result = await response.json();
       console.log(result);
+      window.location.href = "/login";
     } catch (error) {
       console.log("Error registering user:", error.message);
     }

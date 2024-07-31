@@ -2,60 +2,12 @@ import { ProductMongoDao } from "../dao/ProductsMongoDAO.js";
 import { UserMongoDao } from "../dao/UserMongoDAO.js";
 import { ERRORS } from "../utils/EErrors.js";
 import { CustomError } from "../utils/customError.js";
+import { sendMail } from "../utils/sendMail.js";
 
 const productManager = new ProductMongoDao();
 const userDao = new UserMongoDao();
 
 export class ProductController {
-  static home = async (req, res) => {
-    let { limit = 10, page = 1, sort, query } = req.query;
-    let queryParams = {};
-
-    if (query) {
-      queryParams = { ...queryParams, category: query };
-    }
-    const offset = (page - 1) * limit;
-
-    try {
-      const totalProducts = await productManager.Product.countDocuments(
-        queryParams
-      );
-      const totalPages = Math.ceil(totalProducts / limit);
-
-      let products = await productManager.Product.find(
-        queryParams,
-        {},
-        {
-          skip: offset,
-          limit: parseInt(limit),
-          sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
-        }
-      ).lean();
-
-      const response = {
-        status: "success",
-        payload: products,
-        totalPages,
-        prevPage: page > 1 ? page - 1 : null,
-        nextPage: page < totalPages ? page + 1 : null,
-        page,
-        hasPrevPage: page > 1,
-        hasNextPage: page < totalPages,
-        prevLink: page > 1 ? `/?limit=${limit}&page=${page - 1}` : null,
-        nextLink:
-          page < totalPages ? `/?limit=${limit}&page=${page + 1}` : null,
-      };
-      // res.status(200).json(response);
-      res.render("home", { products });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
-  };
-
-  /// **** PRODUCTS **** ///
-
   static products = async (req, res) => {
     let { limit = 10, page = 1, sort, query } = req.query;
     let queryParams = {};
@@ -64,25 +16,19 @@ export class ProductController {
       queryParams = { ...queryParams, category: query };
     }
 
-    let usuario = await userDao.getById(req.user.user._id);
-    if (!usuario) {
-      return res.send("User not found");
-    }
-
-    const offset = (page - 1) * limit;
-
     try {
-      let products = await productManager.Product.find(
-        queryParams,
-        {},
-        {
-          skip: offset,
-          limit: parseInt(limit),
-          sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
-        }
-      ).lean();
-      // res.status(200).json({ message: "products", products, usuario });
-      res.render("products", { products, usuario });
+      const sortOptions = {};
+      if (sort) {
+        sortOptions.price = sort === "asc" ? 1 : -1;
+      }
+
+      let products = await productManager.getProductsPaginated(
+        parseInt(limit),
+        parseInt(page),
+        sortOptions
+      );
+
+      res.status(200).json({ message: "products", products });
     } catch (error) {
       res
         .status(500)
@@ -90,11 +36,48 @@ export class ProductController {
     }
   };
 
-  /// **** ADD PRODUCT **** ///
+  static productsRenderPage = async (req, res) => {
+    let { limit = 10, page = 1, sort, query } = req.query;
+    let queryParams = {};
+    const userId = req.user._id;
+
+    if (query) {
+      queryParams = { ...queryParams, category: query };
+    }
+
+    try {
+      let user = await userDao.getById(userId);
+      if (!user) {
+        return res.send("User not found");
+      }
+
+      let adminUser;
+      if (user.role === "admin") {
+        adminUser = user.role;
+      }
+
+      const sortOptions = {};
+      if (sort) {
+        sortOptions.price = sort === "asc" ? 1 : -1;
+      }
+
+      let products = await productManager.getProductsPaginated(
+        parseInt(limit),
+        parseInt(page),
+        sortOptions
+      );
+
+      res.render("products", { products, user, adminUser });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Error getting products", error: error.message });
+    }
+  };
 
   static addProduct = async (req, res) => {
     const productData = req.body;
-    const owner = req.user.user._id;
+    const owner = req.user._id;
 
     if (productData.code === undefined) {
       return res.status(400).json({ error: "Product code is required" });
@@ -116,16 +99,15 @@ export class ProductController {
       res.status(201).json({ message: "Product added", newProduct });
     } catch (error) {
       res
-        .status(400)
+        .status(500)
         .json({ error: "Error adding product", detalle: error.message });
     }
   };
 
-  /// **** UPDATE PRODUCT **** ///
-
   static updateProduct = async (req, res) => {
     const pid = req.params.pid;
     const updatedProduct = req.body;
+    const userId = req.user._id;
 
     try {
       if (!pid) {
@@ -140,7 +122,7 @@ export class ProductController {
       if (!product) {
         res.status(404).json({ error: "Product not found" });
       } else {
-        const user = await userDao.getById(req.user.user._id);
+        const user = await userDao.getById(userId);
         if (
           user.role === "admin" ||
           product.owner.toString() == user._id.toString()
@@ -162,15 +144,14 @@ export class ProductController {
       }
     } catch (error) {
       res
-        .status(400)
+        .status(500)
         .json({ message: "Error updating product", error: error.message });
     }
   };
 
-  /// **** DELETE PRODUCT **** ///
-
   static deleteProduct = async (req, res) => {
     const pid = req.params.pid;
+    const userId = req.user._id;
 
     try {
       if (!pid) {
@@ -182,15 +163,29 @@ export class ProductController {
         });
       }
       const product = await productManager.getProductById(pid);
+
+      const ownerProduct = product.owner;
+      const creatorProduct = await userDao.getById(ownerProduct);
+
       if (!product) {
         res.status(404).json({ error: "Product not found" });
       } else {
-        const user = await userDao.getById(req.user.user._id);
+        const user = await userDao.getById(userId);
         if (
           product.owner.toString() === user._id.toString() ||
           user.role === "admin"
         ) {
           const deleted = await productManager.deleteProduct(pid);
+
+          const sendEmailUserPremium = async (user) => {
+            const subject = "Producto eliminado";
+            const message = `<h1>Hola ${user.first_name}!</h1>
+            <p>Tu producto con id: <strong>${pid}</strong> ha sido eliminado.</p>
+            <p>Si crees que este es un error, ponte en contacto con nosotros.</p>`;
+
+            await sendMail(user.email, subject, message);
+          };
+          sendEmailUserPremium(creatorProduct);
 
           res.status(200).json({
             message: "Product deleted",

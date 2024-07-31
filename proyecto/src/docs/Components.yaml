@@ -75,6 +75,16 @@ components:
         cart:
           type: ObjectId
           description: Id del carrito del usuario
+        documents:
+          type: array
+          description: Documentos del usuario
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              reference:
+                type: string
       example:
         _id: ObjectId("60acc54545c8e82e0475f73a")
         first_name: Marcelo
@@ -84,6 +94,11 @@ components:
         age: 43
         role: "user"
         cart: ObjectId("09acc1289c8e82e0418f73v")
+        documents:
+          - name: "DNI"
+            reference: "url/dni"
+          - name: "CUIL"
+            reference: "url/cuil"
 
     Cart:
       type: object
@@ -153,6 +168,9 @@ components:
         purchaser:
           type: string
           description: Email del comprador
+        payment_made:
+          type: boolean
+          description: Indica si el pago ya fue realizado
         purchase_datetime:
           type: string
           description: Fecha y hora de la compra
@@ -160,6 +178,7 @@ components:
         _id: ObjectId("60acc54545c8e82e0475f73a")
         code: "123456"
         amount: 100
+        payment_made: true
         purchaser: "ticketemail@example.com"
         purchase_datetime: "2023-05-25 12:34:56"
 

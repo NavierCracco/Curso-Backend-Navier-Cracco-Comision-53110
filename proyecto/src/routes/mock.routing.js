@@ -7,5 +7,5 @@ router.get("/", (req, res) => {
   const products = Array.from({ length: 100 }, generateMockProduct);
 
   res.setHeader("Content-Type", "application/json");
-  res.json({ products: products });
+  res.status(200).json({ products: products });
 });

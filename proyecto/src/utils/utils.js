@@ -7,7 +7,6 @@ const __dirname = dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // console.log(file);
     let folderName = "";
     switch (file.fieldname) {
       case "profiles":
@@ -38,7 +37,6 @@ export default __dirname;
 
 // User de prueba admin
 // const adminUser = {
-//   username: "Batman",
 //   email: "adminCoder@coder.com",
 //   password: "adminCod3r123",
 //   role: "admin",

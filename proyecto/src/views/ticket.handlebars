@@ -1,0 +1,31 @@
+<div class="navbar-container">
+  <h1 class="title">Finaliza la Compra</h1>
+  <div class="navbar">
+    <a href="/">Home page</a>
+    <a href="/products">Productos</a>
+    <a href="/cart/{{user.cart}}">Cart</a>
+  </div>
+</div>
+<hr />
+<br />
+
+<div>
+  <h3>Ticket de compra</h3>
+  {{#if ticket}}
+    <ul>
+      <p><strong>Email: </strong>{{ticket.purchaser}}</p>
+      <p><strong>Code: </strong>{{ticket.code}}</p>
+      <p><strong>Precio final: </strong>${{ticket.amount}}</p>
+    </ul>
+  {{/if}}
+  <form
+    id="finalized-purchase"
+    action="/api/cart/{{ticket._id}}/finalizedpurchase"
+    method="post"
+  >
+    <input type="hidden" name="ticketId" value="{{ticket._id}}" />
+    <button type="submit">COMPRAR</button>
+  </form>
+</div>
+
+<script src="/js/finalizedPurchase.js"></script>

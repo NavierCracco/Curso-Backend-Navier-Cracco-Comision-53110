@@ -32,28 +32,7 @@ describe("Testing router products", function () {
   describe("GET /api/products/", function () {
     let cookie;
     let token;
-    it("should return home page", async function () {
-      const tokenResponse = await requester
-        .post("/api/sessions/login")
-        .send({ email: "test@testing.com", password: "123456789" });
-      cookie = tokenResponse.headers["set-cookie"][0].split(";")[0];
-      token = cookie.split("=")[1];
-
-      const { body, headers, status } = await requester
-        .get("/api/products/")
-        .set("Cookie", `${cookie}`)
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(status).to.equal(200);
-      expect(body).to.be.an("object");
-      expect(headers["content-type"]).to.equal("text/html; charset=utf-8");
-    });
-  });
-
-  describe("GET /api/products/products/", function () {
-    let cookie;
-    let token;
-    it("should return all products in a products page", async function () {
+    it("should return all products on db", async function () {
       const tokenResponse = await requester
         .post("/api/sessions/login")
         .send({ email: "test@testing.com", password: "123456789" });
@@ -61,13 +40,15 @@ describe("Testing router products", function () {
       token = cookie.split("=")[1];
 
       const { body, status, headers } = await requester
-        .get("/api/products/products")
+        .get("/api/products/")
         .set("Cookie", `${cookie}`)
         .set("Authorization", `Bearer ${token}`);
 
       expect(status).to.equal(200);
       expect(body).to.be.an("object");
-      expect(headers["content-type"]).to.equal("text/html; charset=utf-8");
+      expect(headers["content-type"]).to.equal(
+        "application/json; charset=utf-8"
+      );
     });
   });
 

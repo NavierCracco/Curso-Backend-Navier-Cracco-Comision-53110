@@ -1,7 +1,7 @@
 paths:
   /api/products/:
     get:
-      summary: Home page
+      summary: Obtiene todos los productos de la DB
       tags:
         - Products
       parameters:
@@ -13,53 +13,19 @@ paths:
             type: string
       responses:
         "200":
-          description: "Respuesta en formato HTML"
+          description: "Un listado de productos"
           content:
-            text/html:
+            aplication/json:
               schema:
-                type: string
-                example: |
-                  <html lang="en">
-                  <head>
-                    <meta charset="UTF-8" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                    <link rel="stylesheet" href="css/styles.css" />
-                    <title>Curso Backend</title>
-                  </head>
-                  <body>
-                    <div class="navbar-container">
-                      <h1 class="title">Fiuumb3</h1>
-                      <div class="navbar">
-                        <a href="/api/products/products">Productos</a>
-                        <a href="/realtimeproducts">Administrador</a>
-                        <a href="/cart/">Cart</a>
-                        <a href="/api/sessions/logout">Logout</a>
-                      </div>
-                    </div>
-                    <hr />
-                    <h3>Lista de productos</h3>
-                    <ul>
-                      <li><strong>nombre:</strong> audi - <strong>precio:</strong> $40000000</li>
-                      <li><strong>nombre:</strong> fiat palio - <strong>precio:</strong> $2000</li>
-                      <li><strong>nombre:</strong> Renault Sandero - <strong>precio:</strong> $1200000</li>
-                      <li><strong>nombre:</strong> Volkswagen Gol Trend - <strong>precio:</strong> $1150000</li>
-                      <li><strong>nombre:</strong> Ford Ka - <strong>precio:</strong> $1180000</li>
-                      <li><strong>nombre:</strong> Chevrolet Onix - <strong>precio:</strong> $1250000</li>
-                      <li><strong>nombre:</strong> Toyota Etios - <strong>precio:</strong> $1300000</li>
-                      <li><strong>nombre:</strong> Peugeot 208 - <strong>precio:</strong> $1280000</li>
-                      <li><strong>nombre:</strong> Honda Fit - <strong>precio:</strong> $1350000</li>
-                      <li><strong>nombre:</strong> Nissan March - <strong>precio:</strong> $1220000</li>
-                    </ul>
-                    <footer>
-                      <p>Copyright 2024 - Cracco Navier</p>
-                    </footer>
-                  </body>
-                  </html>
-                # properties:
-                #   productos:
-                #     type: array
-                #     items:
-                #       $ref: "#components/schemas/Product"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: products
+                  products:
+                    type: array
+                    items:
+                      $ref: "#components/schemas/Product"
         "500":
           description: "Internal server error"
           content:
@@ -103,6 +69,16 @@ paths:
                     type: object
                     $ref: "#components/schemas/Product"
         "400":
+          description: Codigo ya existente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product code already exists
+        "500":
           description: Error al crear el producto
           content:
             application/json:
@@ -156,7 +132,17 @@ paths:
                   producto:
                     type: object
                     $ref: "#components/schemas/Product"
-        "400":
+        "403":
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Forbidden: You don't have permission to update this product"
+        "500":
           description: Error al actualizar el producto
           content:
             application/json:
@@ -199,7 +185,27 @@ paths:
                   producto:
                     type: object
                     $ref: "#components/schemas/Product"
-        "400":
+        "403":
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Forbidden: You don't have permission to delete this product"
+        "404":
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product not found
+        "500":
           description: Error al eliminar el producto
           content:
             application/json:
@@ -209,148 +215,3 @@ paths:
                   message:
                     type: string
                     example: Error deleting product
-
-  /api/products/products/:
-    get:
-      summary: Obtiene todos los productos de la DB
-      tags:
-        - Products
-      parameters:
-        - name: Authorization
-          in: header
-          required: true
-          description: Token de autenticacion
-          schema:
-            type: string
-      responses:
-        "200":
-          description: devuelve un array de productos en formato HTML
-          content:
-            text/html:
-              schema:
-                type: string
-                example: |
-                  <html lang="en">
-                  <head>
-                    <meta charset="UTF-8" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                    <link rel="stylesheet" href="css/styles.css" />
-                    <title>Curso Backend</title>
-                  </head>
-                  <body>
-                    <div class="navbar-container">
-                      <h2 class="title">Productos</h2>
-                      <div class="navbar">
-                        <a href="/">Home Page</a>
-                        <a href="/cart/666f62cdc5ba9dde12345678">Cart</a>
-                        <a href="/api/sessions/logout">Logout</a>
-                      </div>
-                    </div>
-                    <hr />
-                    <br />
-                    <p id="welcome-message" data-cart="666f62cdc5ba9dde12345678">Bienvenido, usuario: swagger prueba</p>
-                    <br />
-                    <div id="product-list" class="list-container">
-                      <ul id="65ffacfc3c8dee81c814ab08" class="products">
-                        <p class="title-product">audi</p>
-                        <li class="img-product">urltest/audi-a5-negro</li>
-                        <li id="price" data-price="40000000">$40000000</li>
-                        <li><strong>Descripción:</strong> audi a5 negro</li>
-                        <li><strong>Categoría:</strong> autos</li>
-                        <button type="button" class="btn-add-cart" data-id="65ffacfc3c8dee81c814ab08">🛒</button>
-                      </ul>
-                      <ul id="65ffae50b28dd25d4bbb4a11" class="products">
-                        <p class="title-product">fiat palio</p>
-                        <li class="img-product">urltest/fiat-palio-blanco</li>
-                        <li id="price" data-price="2000">$2000</li>
-                        <li><strong>Descripción:</strong> fiat palio blanco</li>
-                        <li><strong>Categoría:</strong> autos</li>
-                        <button type="button" class="btn-add-cart" data-id="65ffae50b28dd25d4bbb4a11">🛒</button>
-                      </ul>
-                      <ul id="660779865cb78efae8cc4747" class="products">
-                        <p class="title-product">Renault Sandero</p>
-                        <li class="img-product">https://example.com/sandero.jpg</li>
-                        <li id="price" data-price="1200000">$1200000</li>
-                        <li><strong>Descripción:</strong> Renault Sandero, Red</li>
-                        <li><strong>Categoría:</strong> Hatchback</li>
-                        <button type="button" class="btn-add-cart" data-id="660779865cb78efae8cc4747">🛒</button>
-                      </ul>
-                      <ul id="66077bf5ccce84582228aaa4" class="products">
-                        <p class="title-product">Volkswagen Gol Trend</p>
-                        <li class="img-product">https://example.com/gol.jpg</li>
-                        <li id="price" data-price="1150000">$1150000</li>
-                        <li><strong>Descripción:</strong> Volkswagen Gol Trend, Blue</li>
-                        <li><strong>Categoría:</strong> Hatchback</li>
-                        <button type="button" class="btn-add-cart" data-id="66077bf5ccce84582228aaa4">🛒</button>
-                      </ul>
-                      <ul id="66077c26ccce84582228aaa9" class="products">
-                        <p class="title-product">Ford Ka</p>
-                        <li class="img-product">https://example.com/ka.jpg</li>
-                        <li id="price" data-price="1180000">$1180000</li>
-                        <li><strong>Descripción:</strong> Ford Ka, Black</li>
-                        <li><strong>Categoría:</strong> Hatchback</li>
-                        <button type="button" class="btn-add-cart" data-id="66077c26ccce84582228aaa9">🛒</button>
-                      </ul>
-                      <ul id="66077c80ccce84582228aaac" class="products">
-                        <p class="title-product">Chevrolet Onix</p>
-                        <li class="img-product">https://example.com/onix.jpg</li>
-                        <li id="price" data-price="1250000">$1250000</li>
-                        <li><strong>Descripción:</strong> Chevrolet Onix, White</li>
-                        <li><strong>Categoría:</strong> Sedan</li>
-                        <button type="button" class="btn-add-cart" data-id="66077c80ccce84582228aaac">🛒</button>
-                      </ul>
-                      <ul id="66077c8accce84582228aaaf" class="products">
-                        <p class="title-product">Toyota Etios</p>
-                        <li class="img-product">https://example.com/etios.jpg</li>
-                        <li id="price" data-price="1300000">$1300000</li>
-                        <li><strong>Descripción:</strong> Toyota Etios, Silver</li>
-                        <li><strong>Categoría:</strong> Sedan</li>
-                        <button type="button" class="btn-add-cart" data-id="66077c8accce84582228aaaf">🛒</button>
-                      </ul>
-                      <ul id="66077cb8ccce84582228aab2" class="products">
-                        <p class="title-product">Peugeot 208</p>
-                        <li class="img-product">https://example.com/208.jpg</li>
-                        <li id="price" data-price="1280000">$1280000</li>
-                        <li><strong>Descripción:</strong> Peugeot 208, Gray</li>
-                        <li><strong>Categoría:</strong> Hatchback</li>
-                        <button type="button" class="btn-add-cart" data-id="66077cb8ccce84582228aab2">🛒</button>
-                      </ul>
-                      <ul id="66077cc4ccce84582228aab5" class="products">
-                        <p class="title-product">Honda Fit</p>
-                        <li class="img-product">https://example.com/fit.jpg</li>
-                        <li id="price" data-price="1350000">$1350000</li>
-                        <li><strong>Descripción:</strong> Honda Fit, Red</li>
-                        <li><strong>Categoría:</strong> Hatchback</li>
-                        <button type="button" class="btn-add-cart" data-id="66077cc4ccce84582228aab5">🛒</button>
-                      </ul>
-                      <ul id="66077cccccce84582228aab8" class="products">
-                        <p class="title-product">Nissan March</p>
-                        <li class="img-product">https://example.com/march.jpg</li>
-                        <li id="price" data-price="1220000">$1220000</li>
-                        <li><strong>Descripción:</strong> Nissan March, Blue</li>
-                        <li><strong>Categoría:</strong> Hatchback</li>
-                        <button type="button" class="btn-add-cart" data-id="66077cccccce84582228aab8">🛒</button>
-                      </ul>
-                    </div>
-                    <script src="/js/addToCart.js"></script>
-                    <footer>
-                      <p>Copyright 2024 - Cracco Navier</p>
-                    </footer>
-                  </body>
-                  </html>
-
-                # properties:
-                #   productos:
-                #     type: array
-                #     items:
-                #       $ref: "#components/schemas/Product"
-        "500":
-          description: Error al obtener los productos
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Error getting products

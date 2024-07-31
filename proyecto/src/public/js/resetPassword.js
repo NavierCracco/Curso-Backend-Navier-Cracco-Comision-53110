@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const result = await response.json();
       console.log(result);
+      window.location.href =
+        "/sessions/login?message=contrasena creada exitosamente";
     } catch (error) {
       console.log("Error al enviar formulario:", error);
     }

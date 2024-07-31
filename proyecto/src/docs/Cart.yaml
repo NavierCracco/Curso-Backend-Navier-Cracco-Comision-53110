@@ -1,9 +1,17 @@
 paths:
-  /cart/:
+  /api/cart/:
     get:
       summary: obtener todos los carritos de la DB
       tags:
         - Cart
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
+
       responses:
         "200":
           description: un listado de carritos
@@ -30,7 +38,7 @@ paths:
                     type: string
                     example: "Internal server error"
 
-  /cart/{cartId}:
+  /api/cart/{cartId}:
     get:
       summary: Obtener un carrito por su ID
       tags:
@@ -62,6 +70,16 @@ paths:
                   cart:
                     type: object
                     $ref: "#components/schemas/Cart"
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart not found"
         "500":
           description: Internal server error
           content:
@@ -116,6 +134,16 @@ paths:
                       userId:
                         type: ObjectId
                         example: "647d8e6e9b123"
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart not found"
         "500":
           description: Internal server error
           content:
@@ -127,7 +155,7 @@ paths:
                     type: string
                     example: "Internal server error"
 
-  /cart/{cartId}/product/{productId}:
+  /api/cart/{cartId}/product/{productId}:
     post:
       summary: Agregar un producto al carrito
       tags:
@@ -190,7 +218,16 @@ paths:
                   message:
                     type: string
                     example: "you can't add your own product to the cart"
-
+        "404":
+          description: Cart or product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart or product not found"
         "500":
           description: Internal server error
           content:
@@ -219,6 +256,12 @@ paths:
             type: string
           required: true
           description: El ID del producto
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
       responses:
         "200":
           description: Producto eliminado del carrito
@@ -245,6 +288,16 @@ paths:
                       userId:
                         type: ObjectId
                         example: "647d8e6e9b123"
+        "404":
+          description: Cart or product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart or product not found"
         "500":
           description: Internal server error
           content:
@@ -273,6 +326,12 @@ paths:
             type: string
           required: true
           description: El ID del producto
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
       requestBody:
         required: true
         content:
@@ -298,6 +357,26 @@ paths:
                   cart:
                     type: object
                     $ref: "#components/schemas/Cart"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "invalid properties"
+        "404":
+          description: Cart or product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart or product not found"
         "500":
           description: Internal server error
           content:
@@ -309,9 +388,9 @@ paths:
                     type: string
                     example: "Internal server error"
 
-  /cart/{cartId}/purchase:
+  /api/cart/{cartId}/purchase:
     get:
-      summary: Comprar los productos del carrito
+      summary: Generar un ticket de compra
       tags:
         - Cart
       parameters:
@@ -321,10 +400,15 @@ paths:
             type: string
           required: true
           description: El ID del carrito
-
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: El token de autenticación
       responses:
         "200":
-          description: Compra realizada con éxito
+          description: Ticket generado correctamente
           content:
             application/json:
               schema:
@@ -332,11 +416,11 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Purchase completed successfully"
+                    example: "Ticket generated correctly."
                   ticket:
                     type: object
                     $ref: "#components/schemas/Ticket"
-        "404":
+        "400":
           description: Producto sin stock
           content:
             application/json:
@@ -345,13 +429,22 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Product out of stock"
+                    example: "Some products are out of stock."
                   itemsWithoutStock:
                     type: array
                     items:
                       type: object
                       $ref: "#components/schemas/ProductCart"
-
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cart not found"
         "500":
           description: Internal server error
           content:

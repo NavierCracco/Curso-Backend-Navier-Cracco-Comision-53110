@@ -20,12 +20,14 @@ document.addEventListener("DOMContentLoaded", function () {
   let buttonList = document.getElementsByClassName("btn-add-cart");
   for (let button of buttonList) {
     button.addEventListener("click", (e) => {
+      const welcomeMessage = document.getElementById("welcome-message");
+      const userId = welcomeMessage.getAttribute("data-userid");
+      const owner = e.target.getAttribute("data-owner");
       let productId = e.target.getAttribute("data-id");
       let cartId = e.target.getAttribute("data-cart");
       let price = e.target.getAttribute("price");
-      // console.log(price);
-      // console.log(`cart id: ${cartId}, product id: ${productId}`);
-      fetch(`/cart/${cartId}/product/${productId}`, {
+
+      fetch(`/api/cart/${cartId}/product/${productId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +40,12 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("producto agregado con exito", data);
+          if (owner === userId) {
+            alert("No puedes agregar tu propio producto al carrito");
+          } else {
+            console.log(data);
+            alert("Producto añadido al carrito!");
+          }
         })
         .catch((error) => {
           console.log("error al agregar producto", error);

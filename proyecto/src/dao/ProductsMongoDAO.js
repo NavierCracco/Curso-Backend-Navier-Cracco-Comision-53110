@@ -13,7 +13,6 @@ export class ProductMongoDao {
       return newProduct;
     } catch (error) {
       console.error("Error adding product:", error.message);
-      throw new Error("Error adding product");
     }
   }
 
@@ -59,12 +58,23 @@ export class ProductMongoDao {
       return await this.Product.findByIdAndDelete(id);
     } catch (error) {
       console.error("Deleting error the product:", error.message);
-      throw new Error("Error deleting product");
     }
   }
 
-  async getProductsPaginated(limit, page) {
-    const offset = (page - 1) * limit;
-    return await this.Product.find({}).limit(limit).skip(offset).lean();
+  async getProductsPaginated(limit, page, sortOptions = {}) {
+    try {
+      const offset = (page - 1) * limit;
+      return await this.Product.find(
+        {},
+        {},
+        {
+          skip: offset,
+          limit: parseInt(limit),
+          sort: sortOptions,
+        }
+      ).lean();
+    } catch (error) {
+      console.error("Error loading products:", error.message);
+    }
   }
 }

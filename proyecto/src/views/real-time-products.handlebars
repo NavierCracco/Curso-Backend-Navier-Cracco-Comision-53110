@@ -1,17 +1,16 @@
 <div class="navbar-container">
   <h2 class="title">Administrador de productos </h2>
   <a href="/"> Home Page</a>
+  <a href="/admin/users">Administrar usuarios</a>
 </div>
 
 <hr />
 <br />
 
-{{#if usuario}}
-  <p id="user-id" data-id="{{usuario._id}}">Bienvenido de vuelta,
-    {{usuario.role}}:
-    {{usuario.first_name}}
-    {{usuario.last_name}}</p>
-{{/if}}
+<p id="user-id" data-id="{{user._id}}">Bienvenido de vuelta,
+  {{user.role}}:
+  {{user.first_name}}
+  {{user.last_name}}</p>
 
 <br />
 

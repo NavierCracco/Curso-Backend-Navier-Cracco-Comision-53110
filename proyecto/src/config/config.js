@@ -18,4 +18,9 @@ export const config = {
     CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
   },
+  nodemailer: {
+    SERVICE: process.env.NODEMAILER_SERVICE,
+    PORT: process.env.NODEMAILER_PORT,
+    USER: process.env.NODEMAILER_USER,
+  },
 };

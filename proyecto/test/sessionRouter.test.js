@@ -53,7 +53,7 @@ describe("Testing router sessions", function () {
   });
 
   describe("POST /api/sessions/login", function () {
-    it("should redirec to /products", async function () {
+    it("should redirec to /", async function () {
       const mockUser = {
         email: "test@testing.com",
         password: "123456789",
@@ -127,9 +127,8 @@ describe("Testing router sessions", function () {
         .post("/api/sessions/resetpassword")
         .send({ email: "test@testing.com" });
 
-      expect(headers["content-type"]).to.be.equal("text/plain; charset=utf-8");
-      expect(headers["location"]).to.be.equal(
-        "/api/sessions/forgotpassword?message=recibira%20un%20email%20en%20breves"
+      expect(headers["content-type"]).to.be.equal(
+        "application/json; charset=utf-8"
       );
     });
 

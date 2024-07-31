@@ -1,10 +1,11 @@
 import nodemailer from "nodemailer";
+import { config } from "../config/config.js";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  port: "587",
+  service: config.nodemailer.SERVICE,
+  port: config.nodemailer.PORT,
   auth: {
-    user: "cracconavier@gmail.com",
+    user: config.nodemailer.USER,
     pass: "ppzu yriu gblv bvre",
   },
 });

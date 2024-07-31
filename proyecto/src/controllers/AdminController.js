@@ -7,33 +7,38 @@ import { ERRORS } from "../utils/EErrors.js";
 const productsManager = new ProductMongoDao();
 const userDao = new UserMongoDao();
 
-export class RealTimeProductsController {
-  static home = async (req, res) => {
-    let products = await productsManager.getProducts();
-    res.status(200).render("home", { products });
-  };
-
-  /// **** GET PRODUCTS **** ///
-
+export class AdminController {
   static getProducts = async (req, res) => {
-    let products = await productsManager.getProducts();
+    try {
+      const products = await productsManager.getProducts();
 
-    let usuario = await userDao.getById(req.user.user._id);
-    if (!usuario) {
-      res.setHeader("Content-Type", "application/json");
-      return res.json("User not found");
+      products.forEach(async (product) => {
+        if (product.stock > 0) {
+          await productsManager.updateProduct(product._id, { status: true });
+        } else {
+          await productsManager.updateProduct(product._id, { status: false });
+        }
+        io.emit("products", await productsManager.getProducts());
+      });
+
+      let user = await userDao.getById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.render("real-time-products", { products, user });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
     }
-
-    res.status(200).render("real-time-products", { products, usuario });
   };
-
-  /// **** ADD PRODUCT **** ///
 
   static addProduct = async (req, res) => {
     const { title, description, code, price, stock, category, thumbnail } =
       req.body;
     const status = true;
-    const ownerId = req.user.user._id;
+    const ownerId = req.user._id;
 
     try {
       if (
@@ -68,6 +73,23 @@ export class RealTimeProductsController {
       io.emit("products", await productsManager.getProducts()); // Emitimos el evento products con los productos actualizados.
     } catch (error) {
       res.status(500).json(error.message);
+    }
+  };
+
+  static renderAdminUsersPage = async (req, res) => {
+    const usuario = req.user;
+
+    try {
+      const getUsers = await userDao.getAllUsers();
+      if (!getUsers) return res.status(404).json({ message: "Not found" });
+
+      const users = getUsers.filter((user) => user.role !== "admin");
+
+      res.render("adminUsers", { users, usuario });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
     }
   };
 }
