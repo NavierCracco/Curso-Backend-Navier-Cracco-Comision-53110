@@ -79,7 +79,7 @@ export class SessionController {
         throw new CustomError({
           name: "Not Found",
           cause: "Invalid arguments",
-          message: "Not found",
+          message: "User not found",
           code: ERRORS["NOT FOUND"],
         });
       }
@@ -89,7 +89,7 @@ export class SessionController {
         throw new CustomError({
           name: "Unauthorized",
           cause: "Invalid credentials",
-          message: "Unauthorized",
+          message: "Contraseña incorrecta",
           code: ERRORS["UNAUTHORIZED"],
         });
       }
