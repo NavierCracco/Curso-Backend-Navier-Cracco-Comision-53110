@@ -46,7 +46,8 @@ export class CartController {
     const { cartId } = req.params;
 
     try {
-      if (!cartId) {
+      const cart = await cartManager.getCartById(cartId);
+      if (!cart) {
         throw new CustomError({
           name: "Not Found",
           cause: "invalid arguments",
@@ -54,8 +55,6 @@ export class CartController {
           code: ERRORS["NOT FOUND"],
         });
       }
-
-      const cart = await cartManager.getCartById(cartId);
 
       res.status(200).json({ message: "cart found", cart });
     } catch (error) {
@@ -69,7 +68,8 @@ export class CartController {
     const { cartId } = req.params;
 
     try {
-      if (!cartId) {
+      const cart = await cartManager.getCartById(cartId);
+      if (!cart) {
         throw new CustomError({
           name: "Not Found",
           cause: "invalid arguments",
@@ -77,7 +77,6 @@ export class CartController {
           code: ERRORS["NOT FOUND"],
         });
       }
-      const cart = await cartManager.getCartById(cartId);
       const isEmpty = cart.products.length === 0;
 
       const userId = cart.userId;
@@ -99,7 +98,7 @@ export class CartController {
     const userId = req.user._id;
 
     try {
-      if (!cartId || !productId) {
+      if (!cartId) {
         throw new CustomError({
           name: "Not Found",
           cause: "cartId or productId are invalid",
@@ -118,6 +117,14 @@ export class CartController {
       }
 
       const product = await productManager.getProductById(productId);
+      if (!product) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "product not found",
+          message: "Product not found",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
 
       if (!product.owner) {
         const cart = await cartManager.addProductToCart(
@@ -154,15 +161,6 @@ export class CartController {
     const { quantity } = req.body;
 
     try {
-      if (!cartId || !productId) {
-        throw new CustomError({
-          name: "Not Found",
-          cause: "cartId or productId are invalid",
-          message: "CartId or productId not found",
-          code: ERRORS["NOT FOUND"],
-        });
-      }
-
       if (!quantity) {
         throw new CustomError({
           name: "Bad request",
@@ -177,7 +175,17 @@ export class CartController {
         productId,
         quantity
       );
+      if (!cartUpdated) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "invalid arguments",
+          message: "Cart not found",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
+
       const cart = await cartManager.getCartById(cartId);
+
       let newTotalPrice = 0;
       cart.products.forEach((product) => {
         const productQuantity = product.quantity;
@@ -210,7 +218,7 @@ export class CartController {
     const { cartId, productId } = req.params;
 
     try {
-      if (!cartId || !productId) {
+      if (!cartId) {
         throw new CustomError({
           name: "Not Found",
           cause: "cartId or productId are invalid",
@@ -220,6 +228,15 @@ export class CartController {
       }
 
       const product = await productManager.getProductById(productId);
+      if (!product) {
+        throw new CustomError({
+          name: "Not Found",
+          cause: "product not found",
+          message: "Product not found",
+          code: ERRORS["NOT FOUND"],
+        });
+      }
+
       const deletedCart = await cartManager.deleteProductCart(
         cartId,
         productId
@@ -243,15 +260,15 @@ export class CartController {
     const { cartId } = req.params;
 
     try {
-      if (!cartId) {
+      const cart = await cartManager.clearCart(cartId);
+      if (!cart) {
         throw new CustomError({
           name: "Not Found",
           cause: "invalid cartId",
-          message: "invalid argument",
+          message: "Cart not found",
           code: ERRORS["NOT FOUND"],
         });
       }
-      const cart = await cartManager.clearCart(cartId);
 
       cart.totalPrice = 0;
 
@@ -267,7 +284,8 @@ export class CartController {
     const { cartId } = req.params;
 
     try {
-      if (!cartId) {
+      const cart = await cartManager.getCartById(cartId);
+      if (!cart) {
         throw new CustomError({
           name: "Not Found",
           cause: "invalid cartId",
@@ -275,7 +293,6 @@ export class CartController {
           code: ERRORS["NOT FOUND"],
         });
       }
-      const cart = await cartManager.getCartById(cartId);
 
       let userId = await userManager.getById(cart.userId);
       let userEmail = userId.email;
@@ -328,6 +345,9 @@ export class CartController {
 
     try {
       const user = await userManager.getById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       delete user.password;
       delete user.documents;
 
@@ -350,7 +370,13 @@ export class CartController {
 
     try {
       const user = await userManager.getById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       const cart = await cartManager.getCartById(user.cart);
+      if (!cart) {
+        return res.status(404).json({ message: "Cart not found" });
+      }
 
       const ticket = await ticketManager.getTicketById(ticketId);
       if (!ticket) {
