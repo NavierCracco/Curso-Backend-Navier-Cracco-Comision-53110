@@ -3,20 +3,21 @@
 <form id="login-form" action="/api/sessions/login" method="post">
 
   <label for="email">Email:</label>
-  <input type="email" name="email" placeholder="email" id="email" />
+  <input type="email" name="email" placeholder="email" id="email" required />
   <label for="password">Password:</label>
   <input
     type="password"
     name="password"
     placeholder="contraseña"
     id="password"
+    required
   />
   <button type="submit">Login</button>
 
 </form>
 
 <br />
-<a href="/register">Regístrate</a>
+<a href="/sessions/register">Regístrate</a>
 <br />
 <a href="/sessions/github">Ingresar con github</a>
 <br />

@@ -158,7 +158,7 @@ export class CartController {
         throw new CustomError({
           name: "Not Found",
           cause: "cartId or productId are invalid",
-          message: "invalid arguments",
+          message: "CartId or productId not found",
           code: ERRORS["NOT FOUND"],
         });
       }
@@ -171,12 +171,35 @@ export class CartController {
           code: ERRORS["BAD REQUEST"],
         });
       }
-      const cart = await cartManager.updateProductQuantity(
+
+      const cartUpdated = await cartManager.updateProductQuantity(
         cartId,
         productId,
         quantity
       );
-      res.status(200).json({ message: "Updated product quantity", cart });
+      const cart = await cartManager.getCartById(cartId);
+      let newTotalPrice = 0;
+      cart.products.forEach((product) => {
+        const productQuantity = product.quantity;
+        const productUnitPrice = product.productId.price;
+        const productPrice = productQuantity * productUnitPrice;
+        newTotalPrice += productPrice;
+      });
+      console.log(newTotalPrice);
+
+      const cartUpdatedWithNewTotalPrice = {
+        _id: cartUpdated._id,
+        totalPrice: newTotalPrice,
+        products: cartUpdated.products,
+        userId: cartUpdated.userId,
+      };
+
+      await cartManager.updateCart(cartId, cartUpdatedWithNewTotalPrice);
+
+      res.status(200).json({
+        message: "Updated product quantity",
+        cartUpdated: cartUpdatedWithNewTotalPrice,
+      });
     } catch (error) {
       res
         .status(500)

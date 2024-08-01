@@ -67,7 +67,7 @@ export class SessionController {
   };
 
   static registerRenderPage = async (req, res) => {
-    res.render("register", { user });
+    res.render("register");
   };
 
   static login = async (req, res) => {
@@ -104,6 +104,7 @@ export class SessionController {
         email: user.email,
         age: user.age,
         role: user.role,
+        cart: user.cart,
         documents: user.documents,
         last_connection: user.last_connection,
         createdAt: user.createdAt,
@@ -236,8 +237,9 @@ export class SessionController {
   };
 
   static current = async (req, res) => {
+    const userId = req.user._doc._id;
     try {
-      let user = await userService.getUserById(req.user._id);
+      const user = await userService.getUserById(userId);
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
