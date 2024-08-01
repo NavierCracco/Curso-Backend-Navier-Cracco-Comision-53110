@@ -185,7 +185,6 @@ export class CartController {
         const productPrice = productQuantity * productUnitPrice;
         newTotalPrice += productPrice;
       });
-      console.log(newTotalPrice);
 
       const cartUpdatedWithNewTotalPrice = {
         _id: cartUpdated._id,
